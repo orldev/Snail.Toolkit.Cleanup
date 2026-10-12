@@ -17,6 +17,10 @@ public sealed record Inventory(
     IReadOnlyList<Discovery> Discoveries,
     IReadOnlyDictionary<string, string> Notes)
 {
+    /// <summary>How long each kind and trail took to look, keyed <c>kind:name</c> and <c>trail:name</c>, and the whole as <c>census</c>.</summary>
+    public IReadOnlyDictionary<string, TimeSpan> Timings { get; init; } = new Dictionary<string, TimeSpan>();
+
     /// <summary>The owners whose sessions are still running.</summary>
+    /// <remarks>Built anew on every read, so that a copy made <c>with</c> other sessions is never stale: read it once, outside a loop.</remarks>
     public IReadOnlySet<Owner> Alive => Sessions.Where(session => session.IsAlive).Select(session => session.Owner).ToHashSet();
 }

@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Snail.MCP.CleanUp.Core.Domain;
 
 /// <summary>The kinds of resource this account knows by name, in the order they are taken apart.</summary>
@@ -11,6 +13,9 @@ public static class Kinds
 {
     /// <summary>A running program.</summary>
     public const string Process = "process";
+
+    /// <summary>An MCP server an agent runs, or one a session left running when it ended.</summary>
+    public const string McpServer = "mcp";
 
     /// <summary>A rule forwarding a port between this machine and a device.</summary>
     public const string Forward = "forward";
@@ -56,24 +61,10 @@ public static class Kinds
 
     /// <summary>The order kinds are taken apart in.</summary>
     public static IReadOnlyList<string> Order { get; } =
-        [Process, Forward, Emulator, Simulator, VirtualDevice, Container, Network, Volume, Image, DanglingImages, BuildCache, BuildHistory, Worktree, Editor, File];
+        [Process, McpServer, Forward, Emulator, Simulator, VirtualDevice, Container, Network, Volume, Image, DanglingImages, BuildCache, BuildHistory, Worktree, Editor, File];
+
+    private static readonly FrozenDictionary<string, int> Ranks = Order.Select((kind, position) => KeyValuePair.Create(kind, position)).ToFrozenDictionary(StringComparer.Ordinal);
 
     /// <summary>Where a kind stands in <see cref="Order"/>; an unknown kind stands after all of them.</summary>
-    public static int Rank(string kind)
-    {
-        var position = Order.IndexOf(kind);
-
-        return position < 0 ? Order.Count : position;
-    }
-
-    private static int IndexOf(this IReadOnlyList<string> kinds, string kind)
-    {
-        for (var position = 0; position < kinds.Count; position++)
-        {
-            if (string.Equals(kinds[position], kind, StringComparison.Ordinal))
-                return position;
-        }
-
-        return -1;
-    }
+    public static int Rank(string kind) => Ranks.TryGetValue(kind, out var position) ? position : Order.Count;
 }

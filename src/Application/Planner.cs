@@ -11,14 +11,21 @@ public static class Planner
     /// <summary>The plan for one scope of one inventory.</summary>
     public static Plan Decide(Inventory inventory, Scope scope, string id)
     {
-        List<Decision> decisions = [.. inventory.Resources.Select(resource => Judge(resource, inventory, scope)).OfType<Decision>()];
+        var alive = inventory.Alive;
+        var decisions = new List<Decision>(inventory.Resources.Count);
 
-        return new Plan(id, inventory.Asker, scope, inventory.TakenAt, Ordering.Of(decisions), Discovered(inventory, scope));
+        foreach (var resource in inventory.Resources)
+        {
+            if (Judge(resource, inventory, alive, scope) is { } decision)
+                decisions.Add(decision);
+        }
+
+        return new Plan(id, inventory.Asker, scope, inventory.TakenAt, Ordering.Of(decisions), Discovered(inventory, alive, scope));
     }
 
-    private static Decision? Judge(Resource resource, Inventory inventory, Scope scope)
+    private static Decision? Judge(Resource resource, Inventory inventory, IReadOnlySet<Owner> alive, Scope scope)
     {
-        var standing = StandingOf(resource, inventory);
+        var standing = StandingOf(resource, inventory.Asker, alive);
 
         if (!Covers(scope, standing))
             return null;
@@ -55,7 +62,7 @@ public static class Planner
         };
     }
 
-    private static Standing StandingOf(Resource resource, Inventory inventory)
+    private static Standing StandingOf(Resource resource, Owner asker, IReadOnlySet<Owner> alive)
     {
         if (resource.IsShared)
             return Standing.Shared;
@@ -63,10 +70,10 @@ public static class Planner
         if (!resource.Owner.IsKnown)
             return Standing.Unowned;
 
-        if (resource.Owner == inventory.Asker)
+        if (resource.Owner == asker)
             return Standing.Mine;
 
-        return inventory.Alive.Contains(resource.Owner) ? Standing.HeldByAnother : Standing.Orphaned;
+        return alive.Contains(resource.Owner) ? Standing.HeldByAnother : Standing.Orphaned;
     }
 
     private static bool Covers(Scope scope, Standing standing) => scope switch
@@ -77,10 +84,10 @@ public static class Planner
         _ => true
     };
 
-    private static IReadOnlyList<Discovery> Discovered(Inventory inventory, Scope scope) => scope switch
+    private static IReadOnlyList<Discovery> Discovered(Inventory inventory, IReadOnlySet<Owner> alive, Scope scope) => scope switch
     {
         Scope.Mine => [.. inventory.Discoveries.Where(discovery => discovery.Owner == inventory.Asker)],
-        Scope.Orphans => [.. inventory.Discoveries.Where(discovery => discovery.Owner != inventory.Asker && !inventory.Alive.Contains(discovery.Owner))],
+        Scope.Orphans => [.. inventory.Discoveries.Where(discovery => discovery.Owner != inventory.Asker && !alive.Contains(discovery.Owner))],
         Scope.Caches => [],
         _ => inventory.Discoveries
     };

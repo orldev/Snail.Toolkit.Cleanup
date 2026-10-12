@@ -16,7 +16,7 @@ public interface ILedger
     Task KeepAsync(string resourceId, string reason, CancellationToken cancellationToken);
 
     /// <summary>Withdraws a request to leave a resource alone; false when there was none.</summary>
-    Task<bool> UnkeepAsync(string resourceId, CancellationToken cancellationToken);
+    Task<bool> TryUnkeepAsync(string resourceId, CancellationToken cancellationToken);
 
     /// <summary>The resources somebody asked to be left alone, with the reasons.</summary>
     Task<IReadOnlyDictionary<string, string>> KeptAsync(CancellationToken cancellationToken);

@@ -9,16 +9,8 @@ namespace Snail.MCP.CleanUp.Core.Adapters;
 /// back, not a change hidden inside the program. The shipped rules come first and the learned ones after,
 /// so the learned ones are what a reader sees last.
 /// </remarks>
-public sealed class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
+public sealed partial class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
 {
-    private static readonly JsonSerializerOptions Options = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-    };
-
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Rule>> ListAsync(CancellationToken cancellationToken) =>
         [.. shipped, .. await LearnedAsync(cancellationToken)];
@@ -32,7 +24,7 @@ public sealed class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
 
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
-        await File.WriteAllTextAsync(temporary, JsonSerializer.Serialize(written, Options), cancellationToken);
+        await File.WriteAllTextAsync(temporary, JsonSerializer.Serialize(written, RulesJson.Default.Learned), cancellationToken);
         File.Move(temporary, path, overwrite: true);
     }
 
@@ -43,7 +35,7 @@ public sealed class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
 
         try
         {
-            return JsonSerializer.Deserialize<Learned>(await File.ReadAllTextAsync(path, cancellationToken), Options)?.Rules ?? [];
+            return JsonSerializer.Deserialize(await File.ReadAllTextAsync(path, cancellationToken), RulesJson.Default.Learned)?.Rules ?? [];
         }
         catch (JsonException)
         {
@@ -53,4 +45,16 @@ public sealed class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
 
     /// <summary>The shape of the file: one list, so that the file can grow other sections without breaking.</summary>
     private sealed record Learned(IReadOnlyList<Rule> Rules);
+
+    /// <summary>Actions written the way a person writes them in the file: <c>cache</c>, not <c>Cache</c>.</summary>
+    private sealed class ActionNames() : JsonStringEnumConverter<RuleAction>(JsonNamingPolicy.CamelCase);
+
+    /// <summary>The file's shape, read and written by generated code, which a native build needs and reflection is not.</summary>
+    [JsonSourceGenerationOptions(
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = [typeof(ActionNames)])]
+    [JsonSerializable(typeof(Learned))]
+    private sealed partial class RulesJson : JsonSerializerContext;
 }

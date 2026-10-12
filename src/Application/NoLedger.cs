@@ -21,7 +21,7 @@ public sealed class NoLedger : ILedger
     public Task KeepAsync(string resourceId, string reason, CancellationToken cancellationToken) => Task.CompletedTask;
 
     /// <inheritdoc/>
-    public Task<bool> UnkeepAsync(string resourceId, CancellationToken cancellationToken) => Task.FromResult(false);
+    public Task<bool> TryUnkeepAsync(string resourceId, CancellationToken cancellationToken) => Task.FromResult(false);
 
     /// <inheritdoc/>
     public Task<IReadOnlyDictionary<string, string>> KeptAsync(CancellationToken cancellationToken) =>

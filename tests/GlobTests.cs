@@ -15,6 +15,13 @@ public sealed class GlobTests
     [InlineData("/a/snail-*", "/a/other", false)]
     [InlineData("/a/*.log", "/a/x.log", true)]
     [InlineData("/a/*-*-1", "/a/snail-me-1", true)]
+    [InlineData("/a/*-*-1", "/a/snail-1", false)]
+    [InlineData("/a/**/c/*.log", "/a/b/c/d/c/x.log", true)]
+    [InlineData("/a/**/c", "/a/c", true)]
+    [InlineData("/a/b", "/a//b/", true)]
+    [InlineData("/a/b", "/a/bc", false)]
+    [InlineData("/a/b/*", "/a/b", false)]
+    [InlineData("*/b", "/a/b", true)]
     public void Pattern_MatchesPathsSegmentBySegment(string pattern, string path, bool expected) =>
         Assert.Equal(expected, Glob.Matches(pattern, path));
 

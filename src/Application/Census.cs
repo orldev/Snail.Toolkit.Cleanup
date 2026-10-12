@@ -33,23 +33,51 @@ public sealed class Census(
     public async Task<Inventory> TakeAsync(Owner asker, CancellationToken cancellationToken)
     {
         var began = clock.GetUtcNow();
+        var started = clock.GetTimestamp();
+        var timings = new System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan>(StringComparer.Ordinal);
         var known = await sessions.ListAsync(cancellationToken);
-        var observations = await Task.WhenAll(kinds.Select(kind => ObservedAsync(kind, known, cancellationToken)));
-        var holdings = (await ledger.HoldingsAsync(cancellationToken)).ToDictionary(holding => holding.ResourceId, StringComparer.Ordinal);
+        var observations = await Task.WhenAll(kinds.Select(kind => TimedAsync($"kind:{kind.Name}", timings, () => ObservedAsync(kind, known, cancellationToken))));
+        var holdings = await TimedAsync("ledger:holdings", timings, async () => (await ledger.HoldingsAsync(cancellationToken)).ToDictionary(holding => holding.ResourceId, StringComparer.Ordinal));
         var now = clock.GetUtcNow();
 
         List<Resource> settled = [.. observations.SelectMany(observation => observation.Resources).Select(resource => Settled(resource, holdings))];
 
-        await RememberAncestryAsync(settled, holdings, now, cancellationToken);
-        await ForgetTheGoneAsync(observations, settled, holdings.Values.Where(holding => holding.RecordedAt < began - Settling), cancellationToken);
+        await TimedAsync("ledger:holdings", timings, async () =>
+        {
+            await RememberAncestryAsync(settled, holdings, now, cancellationToken);
+            await ForgetTheGoneAsync(observations, settled, holdings.Values.Where(holding => holding.RecordedAt < began - Settling), cancellationToken);
 
-        var (found, trailNotes) = await NoticeAsync(observations, settled, known, now, cancellationToken);
+            return true;
+        });
+
+        var (found, trailNotes) = await NoticeAsync(observations, settled, known, now, timings, cancellationToken);
         var notes = observations
             .Where(observation => observation.Note is not null)
             .Select(observation => KeyValuePair.Create(observation.Kind, observation.Note!))
             .Concat(trailNotes);
 
-        return new Inventory(now, asker, settled, known, await ledger.KeptAsync(cancellationToken), found, notes.ToDictionary());
+        var kept = await TimedAsync("ledger:holdings", timings, () => ledger.KeptAsync(cancellationToken));
+
+        timings["census"] = clock.GetElapsedTime(started);
+
+        return new Inventory(now, asker, settled, known, kept, found, notes.ToDictionary()) { Timings = timings.ToDictionary(StringComparer.Ordinal) };
+    }
+
+    /// <summary>Runs one look and adds how long it took to the time written down under its name.</summary>
+    private async Task<T> TimedAsync<T>(string name, System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan> timings, Func<Task<T>> look)
+    {
+        var started = clock.GetTimestamp();
+
+        try
+        {
+            return await look();
+        }
+        finally
+        {
+            var took = clock.GetElapsedTime(started);
+
+            timings.AddOrUpdate(name, took, (_, before) => before + took);
+        }
     }
 
     /// <summary>What a kind sees, or why it could not look: a kind that fails says so instead of failing the census.</summary>
@@ -111,25 +139,46 @@ public sealed class Census(
         IReadOnlyList<Resource> settled,
         IReadOnlyList<Session> known,
         DateTimeOffset now,
+        System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan> timings,
         CancellationToken cancellationToken)
     {
         var shown = await rules.ListAsync(cancellationToken);
-        var followed = await Task.WhenAll(trails.Select(trail => FollowedAsync(trail, shown, cancellationToken)));
+        var followed = await Task.WhenAll(trails.Select(trail => TimedAsync($"trail:{trail.Name}", timings, () => FollowedAsync(trail, shown, cancellationToken))));
         var traces = followed.SelectMany(trail => trail.Traces).ToList();
-        var present = traces.Select(trace => trace.Id).ToHashSet(StringComparer.Ordinal);
+        var ids = new string[traces.Count];
+
+        for (var index = 0; index < traces.Count; index++)
+            ids[index] = traces[index].Id;
+
+        var present = new HashSet<string>(ids, StringComparer.Ordinal);
         var alive = known.Where(session => session.IsAlive).ToList();
 
-        await BeginAsync(alive, traces, now, cancellationToken);
+        await TimedAsync("ledger:baselines", timings, async () =>
+        {
+            await BeginAsync(alive, ids, now, cancellationToken);
 
-        var written = await discoveries.ListAsync(present, cancellationToken);
-        var fresh = await NewAsync(traces, Claimed(observations, settled), shown, alive, written, now, cancellationToken);
+            return true;
+        });
 
-        await discoveries.NoteAsync(fresh, cancellationToken);
-        await baselines.KeepOnlyAsync(alive.Select(session => session.Owner).ToHashSet(), cancellationToken);
+        var written = await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, cancellationToken));
+        var fresh = await TimedAsync("noticing", timings, () => NewAsync(traces, ids, Claimed(observations, settled), shown, alive, written, now, cancellationToken));
+
+        await TimedAsync("ledger:discoveries", timings, async () =>
+        {
+            await discoveries.NoteAsync(fresh, cancellationToken);
+
+            return true;
+        });
+        await TimedAsync("ledger:baselines", timings, async () =>
+        {
+            await baselines.KeepOnlyAsync(alive.Select(session => session.Owner).ToHashSet(), cancellationToken);
+
+            return true;
+        });
 
         var notes = followed.Where(trail => trail.Note is not null).Select(trail => KeyValuePair.Create($"trail:{trail.Name}", trail.Note!));
 
-        return (await discoveries.ListAsync(present, cancellationToken), notes);
+        return (await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, cancellationToken)), notes);
     }
 
     private static async Task<(string Name, IReadOnlyList<Trace> Traces, string? Note)> FollowedAsync(
@@ -159,10 +208,8 @@ public sealed class Census(
     ];
 
     /// <summary>The first census a session takes part in is the line its «new» is measured from.</summary>
-    private async Task BeginAsync(IReadOnlyList<Session> alive, IReadOnlyList<Trace> traces, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task BeginAsync(IReadOnlyList<Session> alive, IReadOnlyList<string> seen, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        List<string> seen = [.. traces.Select(trace => trace.Id)];
-
         foreach (var session in alive)
             await baselines.SaveAsync(session.Owner, seen, now, cancellationToken);
     }
@@ -174,6 +221,7 @@ public sealed class Census(
     /// </summary>
     private async Task<IReadOnlyList<Discovery>> NewAsync(
         IReadOnlyList<Trace> traces,
+        IReadOnlyList<string> ids,
         HashSet<string> claimed,
         IReadOnlyList<Rule> shown,
         IReadOnlyList<Session> alive,
@@ -192,19 +240,41 @@ public sealed class Census(
 
         var fresh = new List<Discovery>();
 
-        foreach (var trace in traces.Where(trace => !claimed.Contains(trace.Id) && !shown.Any(rule => rule.Matches(trace))))
+        for (var index = 0; index < traces.Count; index++)
         {
-            var during = began.Where(entry => !entry.Seen.Contains(trace.Id)).Select(entry => entry.Session).ToList();
+            var (trace, id) = (traces[index], ids[index]);
 
-            if (during.Count == 0)
+            if (claimed.Contains(id) || IsKnown(trace, shown))
                 continue;
 
-            var measured = noted.Contains(trace.Id) ? trace : await MeasuredAsync(trace, cancellationToken);
+            List<Session>? during = null;
+
+            foreach (var (session, seen) in began)
+            {
+                if (!seen.Contains(id))
+                    (during ??= []).Add(session);
+            }
+
+            if (during is null)
+                continue;
+
+            var measured = noted.Contains(id) ? trace : await MeasuredAsync(trace, cancellationToken);
 
             fresh.Add(new Discovery(measured, OwnerOf(trace, during), now, now, 1));
         }
 
         return fresh;
+    }
+
+    private static bool IsKnown(Trace trace, IReadOnlyList<Rule> shown)
+    {
+        foreach (var rule in shown)
+        {
+            if (rule.Matches(trace))
+                return true;
+        }
+
+        return false;
     }
 
     private async Task<Trace> MeasuredAsync(Trace trace, CancellationToken cancellationToken)
