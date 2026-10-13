@@ -56,6 +56,7 @@ public static class Planner
         {
             Evidence.Ledger => new Decision(resource, Verdict.Remove, $"made through this server for {whose}"),
             Evidence.Label => new Decision(resource, Verdict.Remove, $"its name carries {whose}"),
+            Evidence.Environment => new Decision(resource, Verdict.Remove, $"its environment carries {whose}: the agent started it"),
             Evidence.Ancestry => new Decision(resource, Verdict.Remove, $"seen running under the agent of {whose}"),
             Evidence.Appeared => new Decision(resource, Verdict.Report, $"appeared while {whose} was running, which is not proof it is the agent's"),
             _ => new Decision(resource, Verdict.Report, "nothing ties it to an agent")

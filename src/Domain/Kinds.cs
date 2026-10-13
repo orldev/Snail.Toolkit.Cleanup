@@ -56,12 +56,21 @@ public static class Kinds
     /// <summary>A git worktree.</summary>
     public const string Worktree = "worktree";
 
+    /// <summary>The folder a repository's test runs write their dumps, coverage and logs into.</summary>
+    public const string TestResults = "testresults";
+
+    /// <summary>What programs that have ended left for others to reach them, such as the debugger pipes of a .NET process.</summary>
+    public const string Remains = "remains";
+
+    /// <summary>A place programs write into outside their own data folders: reported, never removed.</summary>
+    public const string Outside = "outside";
+
     /// <summary>A file or a directory.</summary>
     public const string File = "file";
 
     /// <summary>The order kinds are taken apart in.</summary>
     public static IReadOnlyList<string> Order { get; } =
-        [Process, McpServer, Forward, Emulator, Simulator, VirtualDevice, Container, Network, Volume, Image, DanglingImages, BuildCache, BuildHistory, Worktree, Editor, File];
+        [Process, McpServer, Forward, Emulator, Simulator, VirtualDevice, Container, Network, Volume, Image, DanglingImages, BuildCache, BuildHistory, Worktree, Editor, TestResults, Remains, Outside, File];
 
     private static readonly FrozenDictionary<string, int> Ranks = Order.Select((kind, position) => KeyValuePair.Create(kind, position)).ToFrozenDictionary(StringComparer.Ordinal);
 
