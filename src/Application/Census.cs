@@ -133,7 +133,7 @@ public sealed class Census(
 
     private static string KindOf(string resourceId) => resourceId[..Math.Max(resourceId.IndexOf(':', StringComparison.Ordinal), 0)];
 
-    /// <summary>Follows every trail, takes the baselines still missing, writes down what is new, and reads back the whole record.</summary>
+    /// <summary>Follows every trail, takes the baselines still missing, writes down what is new, and returns the whole record.</summary>
     private async Task<(IReadOnlyList<Discovery> Found, IEnumerable<KeyValuePair<string, string>> Notes)> NoticeAsync(
         IReadOnlyList<Observation> observations,
         IReadOnlyList<Resource> settled,
@@ -143,7 +143,10 @@ public sealed class Census(
         CancellationToken cancellationToken)
     {
         var shown = await rules.ListAsync(cancellationToken);
-        var followed = await Task.WhenAll(trails.Select(trail => TimedAsync($"trail:{trail.Name}", timings, () => FollowedAsync(trail, shown, cancellationToken))));
+        var walked = Walked(observations);
+        var followed = await Task.WhenAll(trails.Select(trail => walked.TryGetValue(trail.Name, out var traces)
+            ? Task.FromResult<(string Name, IReadOnlyList<Trace> Traces, string? Note)>((trail.Name, traces, null))
+            : TimedAsync($"trail:{trail.Name}", timings, () => FollowedAsync(trail, shown, cancellationToken))));
         var traces = followed.SelectMany(trail => trail.Traces).ToList();
         var ids = new string[traces.Count];
 
@@ -160,7 +163,7 @@ public sealed class Census(
             return true;
         });
 
-        var written = await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, cancellationToken));
+        var written = await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, now, cancellationToken));
         var fresh = await TimedAsync("noticing", timings, () => NewAsync(traces, ids, Claimed(observations, settled), shown, alive, written, now, cancellationToken));
 
         await TimedAsync("ledger:discoveries", timings, async () =>
@@ -178,7 +181,59 @@ public sealed class Census(
 
         var notes = followed.Where(trail => trail.Note is not null).Select(trail => KeyValuePair.Create($"trail:{trail.Name}", trail.Note!));
 
-        return (await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, cancellationToken)), notes);
+        return (Merged(written, fresh), notes);
+    }
+
+    /// <summary>
+    /// The record as this census leaves it, without reading it back: what it noted laid over what it read, the way
+    /// <see cref="IDiscoveries.NoteAsync"/> writes it — one more sighting, seen now, the size when it was measured.
+    /// </summary>
+    /// <remarks>Newest first, as the record is read: what was noted for the first time was first seen now.</remarks>
+    private static IReadOnlyList<Discovery> Merged(IReadOnlyList<Discovery> written, IReadOnlyList<Discovery> fresh)
+    {
+        if (fresh.Count == 0)
+            return written;
+
+        var noted = new Dictionary<string, Discovery>(fresh.Count, StringComparer.Ordinal);
+
+        foreach (var discovery in fresh)
+            noted[discovery.Trace.Id] = discovery;
+
+        var seenAgain = new List<Discovery>(written.Count);
+
+        foreach (var discovery in written)
+        {
+            if (!noted.Remove(discovery.Trace.Id, out var again))
+            {
+                seenAgain.Add(discovery);
+
+                continue;
+            }
+
+            seenAgain.Add(discovery with
+            {
+                Trace = again.Trace.Bytes is null ? discovery.Trace : discovery.Trace with { Bytes = again.Trace.Bytes, IsAtLeast = again.Trace.IsAtLeast },
+                LastSeen = again.LastSeen,
+                Sightings = discovery.Sightings + 1,
+                IsPresent = true
+            });
+        }
+
+        return [.. fresh.Where(discovery => noted.ContainsKey(discovery.Trace.Id)), .. seenAgain];
+    }
+
+    /// <summary>The trails the kinds already followed to look, so that no trail is walked twice in one census.</summary>
+    private static Dictionary<string, IReadOnlyList<Trace>> Walked(IReadOnlyList<Observation> observations)
+    {
+        var walked = new Dictionary<string, IReadOnlyList<Trace>>(StringComparer.Ordinal);
+
+        foreach (var observation in observations)
+        {
+            if (observation.Followed is { } followed)
+                walked.TryAdd(followed.Trail, followed.Traces);
+        }
+
+        return walked;
     }
 
     private static async Task<(string Name, IReadOnlyList<Trace> Traces, string? Note)> FollowedAsync(
@@ -230,7 +285,7 @@ public sealed class Census(
         CancellationToken cancellationToken)
     {
         var noted = written.Select(discovery => discovery.Trace.Id).ToHashSet(StringComparer.Ordinal);
-        var began = new List<(Session Session, IReadOnlySet<string> Seen)>();
+        var began = new List<(Session Session, Baseline Seen)>();
 
         foreach (var session in alive)
         {

@@ -11,6 +11,36 @@ namespace Snail.MCP.CleanUp.Core.Domain;
 /// </remarks>
 public sealed record Trace(string Trail, string Key, string Title, long? Bytes = null)
 {
+    private string? _id;
+
+    /// <summary>The trail that saw it: files, processes, ports, launch agents, containers.</summary>
+    /// <remarks>Fixed once made, not even changed by <c>with</c>, because <see cref="Id"/> is made from it.</remarks>
+    public string Trail { get; } = Trail;
+
+    /// <summary>What tells it apart within its trail, such as a path.</summary>
+    /// <remarks>Fixed once made, not even changed by <c>with</c>, because <see cref="Id"/> is made from it.</remarks>
+    public string Key { get; } = Key;
+
+    /// <summary>Whether the count of <c>Bytes</c> stopped short, so that it takes at least that much and maybe far more.</summary>
+    public bool IsAtLeast { get; init; }
+
     /// <summary>Its identity across all trails.</summary>
-    public string Id => $"{Trail}:{Key}";
+    /// <remarks>
+    /// Made the first time it is asked for, then kept: a census asks a trace for its id several times, and each asking
+    /// built a new string. A trace nobody asks for its id never makes one.
+    /// </remarks>
+    public string Id => _id ??= $"{Trail}:{Key}";
+
+    /// <summary>Equal when trail, key, title and size are: whether the id was made yet is not part of what a trace is.</summary>
+    public bool Equals(Trace? other) =>
+        ReferenceEquals(this, other)
+        || (other is not null
+            && string.Equals(Trail, other.Trail, StringComparison.Ordinal)
+            && string.Equals(Key, other.Key, StringComparison.Ordinal)
+            && string.Equals(Title, other.Title, StringComparison.Ordinal)
+            && Bytes == other.Bytes
+            && IsAtLeast == other.IsAtLeast);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(Trail, Key, Title, Bytes, IsAtLeast);
 }

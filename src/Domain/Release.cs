@@ -23,8 +23,11 @@ public enum Outcome
 /// <param name="Bytes">Space it gave back, when known.</param>
 public sealed record Release(string ResourceId, Outcome Outcome, string Detail, long? Bytes = null)
 {
+    /// <summary>Whether <see cref="Bytes"/> is only what was counted before the count stopped, so that it gave back at least that much.</summary>
+    public bool IsAtLeast { get; init; }
+
     /// <summary>Released now.</summary>
-    public static Release Done(Resource resource, string detail) => new(resource.Id, Outcome.Released, detail, resource.Bytes);
+    public static Release Done(Resource resource, string detail) => new(resource.Id, Outcome.Released, detail, resource.Bytes) { IsAtLeast = resource.IsAtLeast };
 
     /// <summary>Already gone.</summary>
     public static Release AlreadyGone(Resource resource) => new(resource.Id, Outcome.Gone, "already gone");

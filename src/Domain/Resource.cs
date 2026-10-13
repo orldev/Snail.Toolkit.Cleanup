@@ -25,6 +25,9 @@ public sealed record Resource
     /// <summary>Space it takes on disk, when that was measured.</summary>
     public long? Bytes { get; init; }
 
+    /// <summary>Whether the count of <see cref="Bytes"/> stopped short, so that it takes at least that much and maybe far more.</summary>
+    public bool IsAtLeast { get; init; }
+
     /// <summary>When it came to be, when that is known.</summary>
     public DateTimeOffset? CreatedAt { get; init; }
 

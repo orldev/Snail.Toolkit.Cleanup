@@ -9,10 +9,16 @@ namespace Snail.MCP.CleanUp.Core.Domain;
 /// <remarks>
 /// A discovery is never removed. It is written down so that a person can see what agents leave that nobody
 /// has thought of yet, and turn it into a rule — the account learns the new kind as data, not as code.
-/// It stays written down after the thing itself is gone, because «agents leave this» is still true.
+/// While the thing is there, every census sees it again and it stays in the report. It stays written down for
+/// <see cref="Remembered"/> after the thing itself is gone, because «agents leave this» is still true for a while —
+/// and no longer, because a record nobody prunes grows by every temporary file an agent ever made.
 /// </remarks>
 public sealed record Discovery(Trace Trace, Owner Owner, DateTimeOffset FirstSeen, DateTimeOffset LastSeen, int Sightings)
 {
+    /// <summary>How long a discovery stays written down after its thing was last seen.</summary>
+    /// <remarks>Measured on 2026-10-13: a ledger nothing pruned held 100 000 discoveries, and every census read all of them twice.</remarks>
+    public static TimeSpan Remembered { get; } = TimeSpan.FromDays(3);
+
     /// <summary>Whether the thing is still there at the last census.</summary>
     public bool IsPresent { get; init; } = true;
 }
