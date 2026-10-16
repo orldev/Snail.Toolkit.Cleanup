@@ -47,6 +47,48 @@ public sealed class CleanerTests
         Assert.Empty(_files.Released);
     }
 
+    /// <summary>
+    /// The plan took Gone for ended; by the time it is carried out Gone is going again — a session resumed under its id.
+    /// What it holds stays, and the release says why.
+    /// </summary>
+    [Fact]
+    public async Task Orphan_WhoseOwnerIsGoingAgainAtTheApply_IsLeftAlone()
+    {
+        var scratchpad = Of(Kinds.File, "/scratch/gone", Gone);
+        var plan = Planner.Decide(Inventory([scratchpad]), Scope.Orphans, "plan", Order);
+        var cleaner = new Cleaner([_files], _ledger, new FakeHolders(Me, Alive(Me), Alive(Gone)));
+
+        var release = Assert.Single(await cleaner.ApplyAsync(plan, CancellationToken.None));
+
+        Assert.Equal(Outcome.Changed, release.Outcome);
+        Assert.Contains("going again", release.Detail, StringComparison.Ordinal);
+        Assert.Empty(_files.Released);
+    }
+
+    [Fact]
+    public async Task Orphan_WhoseOwnerIsStillOverAtTheApply_IsReleased()
+    {
+        var scratchpad = Of(Kinds.File, "/scratch/gone", Gone);
+        var plan = Planner.Decide(Inventory([scratchpad]), Scope.Orphans, "plan", Order);
+        var cleaner = new Cleaner([_files], _ledger, new FakeHolders(Me, Alive(Me), Dead(Gone)));
+
+        var release = Assert.Single(await cleaner.ApplyAsync(plan, CancellationToken.None));
+
+        Assert.Equal(Outcome.Released, release.Outcome);
+    }
+
+    /// <summary>What the asker holds is the asker's to remove, alive as the asker is.</summary>
+    [Fact]
+    public async Task AskersOwn_WithTheAskerGoing_IsReleased()
+    {
+        var file = Of(Kinds.File, "/scratch/me", Me);
+        var cleaner = new Cleaner([_files], _ledger, new FakeHolders(Me, Alive(Me)));
+
+        var release = Assert.Single(await cleaner.ApplyAsync(Planned(file), CancellationToken.None));
+
+        Assert.Equal(Outcome.Released, release.Outcome);
+    }
+
     [Fact]
     public async Task Resource_OfAKindNothingHereReleases_IsRefusedWithTheReason()
     {

@@ -87,6 +87,7 @@ Snail.Toolkit.Cleanup.Application.Census.TakeAsync(Snail.Toolkit.Cleanup.Domain.
 Snail.Toolkit.Cleanup.Application.Cleaner
 Snail.Toolkit.Cleanup.Application.Cleaner.ApplyAsync(Snail.Toolkit.Cleanup.Domain.Plan! plan, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Release!>!>!
 Snail.Toolkit.Cleanup.Application.Cleaner.Cleaner(System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.IResourceKind!>! kinds, Snail.Toolkit.Cleanup.Application.Ports.ILedger! ledger) -> void
+Snail.Toolkit.Cleanup.Application.Cleaner.Cleaner(System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.IResourceKind!>! kinds, Snail.Toolkit.Cleanup.Application.Ports.ILedger! ledger, Snail.Toolkit.Cleanup.Application.Ports.IHolders? holders) -> void
 Snail.Toolkit.Cleanup.Application.NoLedger
 Snail.Toolkit.Cleanup.Application.NoLedger.ForgetAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 Snail.Toolkit.Cleanup.Application.NoLedger.HoldingsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holding!>!>!
