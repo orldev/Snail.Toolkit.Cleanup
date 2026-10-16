@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+
 namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>What every trail showed when an owner began, kept as 64-bit hashes of the trace ids: all a census asks of it is whether it held an id.</summary>
@@ -27,6 +29,36 @@ public sealed class Baseline
 
     /// <summary>Whether the owner began with this trace, but for the odds in the remarks.</summary>
     public bool Contains(string traceId) => _hashes.Contains(Hash(traceId));
+
+    /// <summary>The hashes it holds, eight little-endian bytes each, in no order: a baseline whole, for a host that stores it as one value.</summary>
+    /// <remarks>
+    /// Stored as one row per id, the baselines of eleven sessions took 413 453 rows and 115 MB of a ledger with their index
+    /// (2026-10-16); as hashes they are eight bytes an id.
+    /// </remarks>
+    public byte[] ToBytes()
+    {
+        var bytes = new byte[_hashes.Count * sizeof(ulong)];
+        var offset = 0;
+
+        foreach (var hash in _hashes)
+        {
+            BinaryPrimitives.WriteUInt64LittleEndian(bytes.AsSpan(offset), hash);
+            offset += sizeof(ulong);
+        }
+
+        return bytes;
+    }
+
+    /// <summary>The baseline <see cref="ToBytes"/> wrote; bytes past the last whole hash are no hash and are passed over.</summary>
+    public static Baseline FromBytes(ReadOnlySpan<byte> bytes)
+    {
+        var baseline = new Baseline();
+
+        for (var offset = 0; offset + sizeof(ulong) <= bytes.Length; offset += sizeof(ulong))
+            baseline._hashes.Add(BinaryPrimitives.ReadUInt64LittleEndian(bytes[offset..]));
+
+        return baseline;
+    }
 
     /// <summary>FNV-1a over the UTF-16 code units of an id: 64 bits, where <see cref="string.GetHashCode()"/> has 32 and the odds above would be four billion times worse.</summary>
     private static ulong Hash(ReadOnlySpan<char> traceId)

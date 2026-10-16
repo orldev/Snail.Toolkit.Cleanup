@@ -22,6 +22,14 @@ var releases = await new Cleaner(kinds, new NoLedger()).ApplyAsync(plan, cancell
 A host with a ledger, baselines and trails takes the inventory with a `Census` instead, and the inventory it answers
 also carries the asking owner, what was kept on request, the discoveries and what could not be seen.
 
+A plan may be carried out minutes after it was decided. A host whose owners can come back — a session of an agent is
+resumed under the same id — gives the cleaner its holders, `new Cleaner(kinds, ledger, holders)`: they are asked once
+more before anything goes, and what belongs to an owner going again is left alone, its release `Changed`. A host whose
+owners never come back once over, such as finished tasks, may leave them out.
+
+A host that stores baselines whole keeps `Baseline.ToBytes()`, eight bytes an id, and reads it back with
+`Baseline.FromBytes`.
+
 ## Owners
 
 An `Owner` is a kind the host names and an id: `session:…`, `task:…`, `project:…`. A `Holder` is an owner the host

@@ -135,6 +135,8 @@ Snail.Toolkit.Cleanup.Domain.Baseline.Add(string! traceId) -> void
 Snail.Toolkit.Cleanup.Domain.Baseline.Baseline() -> void
 Snail.Toolkit.Cleanup.Domain.Baseline.Contains(string! traceId) -> bool
 Snail.Toolkit.Cleanup.Domain.Baseline.Count.get -> int
+Snail.Toolkit.Cleanup.Domain.Baseline.ToBytes() -> byte[]!
+static Snail.Toolkit.Cleanup.Domain.Baseline.FromBytes(System.ReadOnlySpan<byte> bytes) -> Snail.Toolkit.Cleanup.Domain.Baseline!
 Snail.Toolkit.Cleanup.Domain.Decision
 Snail.Toolkit.Cleanup.Domain.Decision.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Decision!
 Snail.Toolkit.Cleanup.Domain.Decision.Decision(Snail.Toolkit.Cleanup.Domain.Resource! Resource, Snail.Toolkit.Cleanup.Domain.Verdict Verdict, string! Reason) -> void

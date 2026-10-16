@@ -70,7 +70,8 @@ Carries out the removals of a plan that was shown, one resource at a time, in th
 
 | Member | Summary |
 | --- | --- |
-| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger)` | Carries out the removals of a plan that was shown, one resource at a time, in the plan's order. |
+| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger)` | A cleaner that takes the plan's word for which owners are over. |
+| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger, IHolders? holders)` | Carries out the removals of a plan that was shown, one resource at a time, in the plan's order. |
 | `Task<IReadOnlyList<Release>> ApplyAsync(Plan plan, CancellationToken cancellationToken)` | The removals of the plan, carried out, each with how it ended. |
 
 ### class NoLedger
@@ -193,8 +194,10 @@ What every trail showed when an owner began, kept as 64-bit hashes of the trace 
 
 | Member | Summary |
 | --- | --- |
+| `Baseline FromBytes(ReadOnlySpan<byte> bytes)` | The baseline `ToBytes` wrote; bytes past the last whole hash are no hash and are passed over. |
 | `Baseline()` |  |
 | `bool Contains(string traceId)` | Whether the owner began with this trace, but for the odds in the remarks. |
+| `byte[] ToBytes()` | The hashes it holds, eight little-endian bytes each, in no order: a baseline whole, for a host that stores it as one value. |
 | `int Count { get; }` | How many distinct hashes it holds. |
 | `void Add(string traceId)` | Adds the id of a trace the owner began with. |
 
