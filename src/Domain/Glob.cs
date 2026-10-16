@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>Path patterns as people write them: <c>*</c> for one segment, <c>**</c> for any number of them, <c>~</c> for home.</summary>
 /// <remarks>

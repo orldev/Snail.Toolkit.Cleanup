@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>One resource, what is to be done with it, and why.</summary>
 public sealed record Decision(Resource Resource, Verdict Verdict, string Reason);

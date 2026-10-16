@@ -1,9 +1,9 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
-/// <summary>Something on this machine that an agent may have left: what it is, whose it is, and how sure that is.</summary>
+/// <summary>Something an owner may have left behind: what it is, whose it is, and how sure that is.</summary>
 public sealed record Resource
 {
-    /// <summary>What kind of thing it is, one of <see cref="Kinds"/> or a kind a learned rule names.</summary>
+    /// <summary>What kind of thing it is: one of <see cref="Kinds"/>, a kind of the host, or a kind a learned rule names.</summary>
     public required string Kind { get; init; }
 
     /// <summary>What tells it apart from every other of its kind, stable for as long as it exists.</summary>
@@ -34,7 +34,7 @@ public sealed record Resource
     /// <summary>Whether it rebuilds itself when removed, so removing it frees space rather than losing work.</summary>
     public bool IsRegenerable { get; init; }
 
-    /// <summary>Whether it belongs to the machine rather than to anyone: a cache every session writes into.</summary>
+    /// <summary>Whether it belongs to the machine rather than to anyone: a cache every owner writes into.</summary>
     /// <remarks>A shared resource is never removed on ownership, only when caches are asked for by name.</remarks>
     public bool IsShared { get; init; }
 

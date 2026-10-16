@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Application.Ports;
+namespace Snail.Toolkit.Cleanup.Application.Ports;
 
 /// <summary>Plans that were shown, kept until they are carried out or go stale.</summary>
 public interface IPlans

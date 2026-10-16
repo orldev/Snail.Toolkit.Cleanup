@@ -1,5 +1,5 @@
-using Snail.MCP.CleanUp.Core.Application.Ports;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Application.Ports;
+using Snail.Toolkit.Cleanup.Domain;
 
 namespace Snail.Toolkit.Cleanup.Benchmarks;
 
@@ -94,7 +94,7 @@ internal sealed class WalkingKind(string name, IReadOnlyList<Resource> resources
 {
     public string Name => name;
 
-    public Task<Observation> ObserveAsync(IReadOnlyList<Session> sessions, CancellationToken cancellationToken) =>
+    public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken) =>
         Task.FromResult(new Observation(Name, resources, []) { Followed = new Walk(Name, walked) });
 
     public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
@@ -110,12 +110,12 @@ internal sealed class StillTrail(string name, IReadOnlyList<Trace> traces) : ITr
     public Task<Trace> MeasureAsync(Trace trace, CancellationToken cancellationToken) => Task.FromResult(trace with { Bytes = 4_096 });
 }
 
-/// <summary>The sessions of the benchmark, always the same.</summary>
-internal sealed class StillSessions(params Session[] sessions) : ISessions
+/// <summary>The owners of the benchmark, always the same.</summary>
+internal sealed class StillHolders(params Holder[] holders) : IHolders
 {
-    public Task<IReadOnlyList<Session>> ListAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<Session>>(sessions);
+    public Task<IReadOnlyList<Holder>> ListAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<Holder>>(holders);
 
-    public Task<Owner> CurrentAsync(CancellationToken cancellationToken) => Task.FromResult(sessions[0].Owner);
+    public Task<Owner> CurrentAsync(CancellationToken cancellationToken) => Task.FromResult(holders[0].Owner);
 }
 
 /// <summary>Rules that never change.</summary>

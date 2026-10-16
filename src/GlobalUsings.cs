@@ -1,2 +1,2 @@
-global using Snail.MCP.CleanUp.Core.Application.Ports;
-global using Snail.MCP.CleanUp.Core.Domain;
+global using Snail.Toolkit.Cleanup.Application.Ports;
+global using Snail.Toolkit.Cleanup.Domain;

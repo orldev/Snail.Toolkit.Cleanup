@@ -1,6 +1,6 @@
-namespace Snail.MCP.CleanUp.Core.Application.Ports;
+namespace Snail.Toolkit.Cleanup.Application.Ports;
 
-/// <summary>The written account of who holds what, kept across sessions so that one which died is still answered for.</summary>
+/// <summary>The written account of who holds what, kept across censuses so that an owner which ended is still answered for.</summary>
 public interface ILedger
 {
     /// <summary>Writes down a holding, replacing what was known of that resource only when the new evidence is stronger.</summary>

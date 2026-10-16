@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Time.Testing;
-using Snail.MCP.CleanUp.Core.Adapters;
-using Snail.MCP.CleanUp.Core.Application;
-using Snail.MCP.CleanUp.Core.Application.Ports;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Adapters;
+using Snail.Toolkit.Cleanup.Application;
+using Snail.Toolkit.Cleanup.Application.Ports;
+using Snail.Toolkit.Cleanup.Domain;
 using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
 namespace Snail.Toolkit.Cleanup.Tests;
@@ -21,7 +21,7 @@ public sealed class DiscoveryTests : IDisposable
 
     private readonly FakeTimeProvider _clock = new(DateTimeOffset.UnixEpoch);
 
-    private Session[] _sessions = [new(Me.Id, 1, DateTimeOffset.UnixEpoch, "/work/me", IsAlive: true)];
+    private Holder[] _sessions = [new(Me, IsAlive: true) { Directory = "/work/me" }];
 
     private readonly MemoryLedger _ledger = new();
 
@@ -36,7 +36,7 @@ public sealed class DiscoveryTests : IDisposable
     private Census CensusOf(IResourceKind kind) => new(
         [kind],
         [_files],
-        new FakeSessions(Me, _sessions),
+        new FakeHolders(Me, _sessions),
         _ledger,
         Rules,
         _baselines,
@@ -137,7 +137,7 @@ public sealed class DiscoveryTests : IDisposable
         _files.Add("/tmp/thing");
         await TakenAsync();
 
-        _sessions = [new(Neighbour.Id, 2, DateTimeOffset.UnixEpoch, "/work/neighbour", IsAlive: true)];
+        _sessions = [new(Neighbour, IsAlive: true) { Directory = "/work/neighbour" }];
         await TakenAsync();
 
         _clock.Advance(Discovery.Remembered + TimeSpan.FromDays(1));
@@ -181,7 +181,7 @@ public sealed class DiscoveryTests : IDisposable
         var census = new Census(
             [new ClaimingKind(trace.Id)],
             [_files],
-            new FakeSessions(Me, _sessions),
+            new FakeHolders(Me, _sessions),
             _ledger,
             Rules,
             _baselines,
@@ -247,7 +247,7 @@ public sealed class DiscoveryTests : IDisposable
     [Fact]
     public async Task Discovery_InsideASessionsDirectory_IsThatSessions_EvenWithOthersRunning()
     {
-        _sessions = [_sessions[0], new(Neighbour.Id, 2, DateTimeOffset.UnixEpoch, "/work/neighbour", IsAlive: true)];
+        _sessions = [_sessions[0], new(Neighbour, IsAlive: true) { Directory = "/work/neighbour" }];
 
         await TakenAsync();
         _files.Add("/work/neighbour/.venv");
@@ -265,7 +265,7 @@ public sealed class DiscoveryTests : IDisposable
         await TakenAsync();
         _files.Add("/tmp/thing");
 
-        var plan = Planner.Decide(await TakenAsync(), Scope.Everything, "plan");
+        var plan = Planner.Decide(await TakenAsync(), Scope.Everything, "plan", Order);
 
         Assert.Single(plan.Discoveries);
         Assert.Empty(plan.Removals);
@@ -278,7 +278,7 @@ public sealed class DiscoveryTests : IDisposable
     {
         public string Name => Kinds.File;
 
-        public Task<Observation> ObserveAsync(IReadOnlyList<Session> sessions, CancellationToken cancellationToken) =>
+        public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken) =>
             Task.FromResult(new Observation(Name, [], []) { Followed = new Walk(trail.Name, [.. trail.Present]) });
 
         public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) =>
@@ -289,7 +289,7 @@ public sealed class DiscoveryTests : IDisposable
     {
         public string Name => Kinds.File;
 
-        public Task<Observation> ObserveAsync(IReadOnlyList<Session> sessions, CancellationToken cancellationToken) =>
+        public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken) =>
             Task.FromResult(new Observation(Name, [], [claimed]));
 
         public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) =>

@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Application;
+namespace Snail.Toolkit.Cleanup.Application;
 
 /// <summary>The ledger of a host whose resources carry their owner in their own names, so there is nothing to write down.</summary>
 /// <remarks>

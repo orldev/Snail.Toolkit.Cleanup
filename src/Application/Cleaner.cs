@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Application;
+namespace Snail.Toolkit.Cleanup.Application;
 
 /// <summary>Carries out the removals of a plan that was shown, one resource at a time, in the plan's order.</summary>
 /// <remarks>
@@ -38,7 +38,7 @@ public sealed class Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger)
             return Release.Refused(resource, $"not attempted: {waitedFor} had to go first and did not");
 
         if (!_kinds.TryGetValue(resource.Kind, out var kind))
-            return Release.Refused(resource, $"no kind on this machine releases {resource.Kind}");
+            return Release.Refused(resource, $"no kind of the host releases {resource.Kind}");
 
         try
         {

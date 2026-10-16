@@ -1,406 +1,396 @@
 #nullable enable
-const Snail.MCP.CleanUp.Core.Domain.Kinds.BuildCache = "buildcache" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.BuildHistory = "buildhistory" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Container = "container" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.DanglingImages = "dangling" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Editor = "editor" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Emulator = "emulator" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.File = "file" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Forward = "forward" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Image = "image" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.McpServer = "mcp" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Network = "network" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Outside = "outside" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Process = "process" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Remains = "remains" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Simulator = "simulator" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.TestResults = "testresults" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.VirtualDevice = "avd" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Volume = "volume" -> string!
-const Snail.MCP.CleanUp.Core.Domain.Kinds.Worktree = "worktree" -> string!
-override Snail.MCP.CleanUp.Core.Domain.Decision.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Decision.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Decision.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Discovery.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Discovery.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Discovery.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Holding.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Holding.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Holding.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Inventory.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Inventory.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Inventory.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Observation.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Observation.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Observation.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Owner.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Owner.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Plan.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Plan.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Plan.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Release.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Release.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Release.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Resource.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Resource.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Resource.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Rule.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Rule.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Rule.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Session.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Session.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Session.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Trace.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Trace.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Trace.ToString() -> string!
-override Snail.MCP.CleanUp.Core.Domain.Walk.Equals(object? obj) -> bool
-override Snail.MCP.CleanUp.Core.Domain.Walk.GetHashCode() -> int
-override Snail.MCP.CleanUp.Core.Domain.Walk.ToString() -> string!
-Snail.MCP.CleanUp.Core.Adapters.JsonRules
-Snail.MCP.CleanUp.Core.Adapters.JsonRules.AddAsync(Snail.MCP.CleanUp.Core.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Adapters.JsonRules.JsonRules(string! path, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Rule!>! shipped) -> void
-Snail.MCP.CleanUp.Core.Adapters.JsonRules.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Rule!>!>!
-Snail.MCP.CleanUp.Core.Application.Census
-Snail.MCP.CleanUp.Core.Application.Census.Census(System.Collections.Generic.IEnumerable<Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind!>! kinds, System.Collections.Generic.IEnumerable<Snail.MCP.CleanUp.Core.Application.Ports.ITrail!>! trails, Snail.MCP.CleanUp.Core.Application.Ports.ISessions! sessions, Snail.MCP.CleanUp.Core.Application.Ports.ILedger! ledger, Snail.MCP.CleanUp.Core.Application.Ports.IRules! rules, Snail.MCP.CleanUp.Core.Application.Ports.IBaselines! baselines, Snail.MCP.CleanUp.Core.Application.Ports.IDiscoveries! discoveries, System.TimeProvider! clock) -> void
-Snail.MCP.CleanUp.Core.Application.Census.TakeAsync(Snail.MCP.CleanUp.Core.Domain.Owner asker, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Inventory!>!
-Snail.MCP.CleanUp.Core.Application.Cleaner
-Snail.MCP.CleanUp.Core.Application.Cleaner.ApplyAsync(Snail.MCP.CleanUp.Core.Domain.Plan! plan, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Release!>!>!
-Snail.MCP.CleanUp.Core.Application.Cleaner.Cleaner(System.Collections.Generic.IEnumerable<Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind!>! kinds, Snail.MCP.CleanUp.Core.Application.Ports.ILedger! ledger) -> void
-Snail.MCP.CleanUp.Core.Application.NoLedger
-Snail.MCP.CleanUp.Core.Application.NoLedger.ForgetAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.NoLedger.HoldingsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Holding!>!>!
-Snail.MCP.CleanUp.Core.Application.NoLedger.KeepAsync(string! resourceId, string! reason, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.NoLedger.KeptAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
-Snail.MCP.CleanUp.Core.Application.NoLedger.NoLedger() -> void
-Snail.MCP.CleanUp.Core.Application.NoLedger.RecordAsync(Snail.MCP.CleanUp.Core.Domain.Holding! holding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.NoLedger.TryUnkeepAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
-Snail.MCP.CleanUp.Core.Application.Ordering
-Snail.MCP.CleanUp.Core.Application.Planner
-Snail.MCP.CleanUp.Core.Application.Ports.IBaselines
-Snail.MCP.CleanUp.Core.Application.Ports.IBaselines.FindAsync(Snail.MCP.CleanUp.Core.Domain.Owner owner, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Baseline?>!
-Snail.MCP.CleanUp.Core.Application.Ports.IBaselines.KeepOnlyAsync(System.Collections.Generic.IReadOnlySet<Snail.MCP.CleanUp.Core.Domain.Owner>! owners, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.IBaselines.SaveAsync(Snail.MCP.CleanUp.Core.Domain.Owner owner, System.Collections.Generic.IReadOnlyList<string!>! traceIds, System.DateTimeOffset takenAt, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.IDiscoveries
-Snail.MCP.CleanUp.Core.Application.Ports.IDiscoveries.ListAsync(System.Collections.Generic.IReadOnlySet<string!>! present, System.DateTimeOffset now, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.IDiscoveries.NoteAsync(System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>! discoveries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.IDiscoveries.SettleAsync(Snail.MCP.CleanUp.Core.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.ForgetAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.HoldingsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Holding!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.KeepAsync(string! resourceId, string! reason, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.KeptAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.RecordAsync(Snail.MCP.CleanUp.Core.Domain.Holding! holding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.ILedger.TryUnkeepAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
-Snail.MCP.CleanUp.Core.Application.Ports.IPlans
-Snail.MCP.CleanUp.Core.Application.Ports.IPlans.FindAsync(string! id, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Plan?>!
-Snail.MCP.CleanUp.Core.Application.Ports.IPlans.SaveAsync(Snail.MCP.CleanUp.Core.Domain.Plan! plan, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind
-Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind.Name.get -> string!
-Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind.ObserveAsync(System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Session!>! sessions, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Observation!>!
-Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind.ReleaseAsync(Snail.MCP.CleanUp.Core.Domain.Resource! resource, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Release!>!
-Snail.MCP.CleanUp.Core.Application.Ports.IRules
-Snail.MCP.CleanUp.Core.Application.Ports.IRules.AddAsync(Snail.MCP.CleanUp.Core.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Snail.MCP.CleanUp.Core.Application.Ports.IRules.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Rule!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ISessions
-Snail.MCP.CleanUp.Core.Application.Ports.ISessions.CurrentAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Owner>!
-Snail.MCP.CleanUp.Core.Application.Ports.ISessions.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Session!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ITrail
-Snail.MCP.CleanUp.Core.Application.Ports.ITrail.FollowAsync(System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Rule!>! rules, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Trace!>!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ITrail.MeasureAsync(Snail.MCP.CleanUp.Core.Domain.Trace! trace, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.MCP.CleanUp.Core.Domain.Trace!>!
-Snail.MCP.CleanUp.Core.Application.Ports.ITrail.Name.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Baseline
-Snail.MCP.CleanUp.Core.Domain.Baseline.Add(string! traceId) -> void
-Snail.MCP.CleanUp.Core.Domain.Baseline.Baseline() -> void
-Snail.MCP.CleanUp.Core.Domain.Baseline.Contains(string! traceId) -> bool
-Snail.MCP.CleanUp.Core.Domain.Baseline.Count.get -> int
-Snail.MCP.CleanUp.Core.Domain.Decision
-Snail.MCP.CleanUp.Core.Domain.Decision.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Decision!
-Snail.MCP.CleanUp.Core.Domain.Decision.Decision(Snail.MCP.CleanUp.Core.Domain.Resource! Resource, Snail.MCP.CleanUp.Core.Domain.Verdict Verdict, string! Reason) -> void
-Snail.MCP.CleanUp.Core.Domain.Decision.Deconstruct(out Snail.MCP.CleanUp.Core.Domain.Resource! Resource, out Snail.MCP.CleanUp.Core.Domain.Verdict Verdict, out string! Reason) -> void
-Snail.MCP.CleanUp.Core.Domain.Decision.Equals(Snail.MCP.CleanUp.Core.Domain.Decision? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Decision.Reason.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Decision.Reason.init -> void
-Snail.MCP.CleanUp.Core.Domain.Decision.Resource.get -> Snail.MCP.CleanUp.Core.Domain.Resource!
-Snail.MCP.CleanUp.Core.Domain.Decision.Resource.init -> void
-Snail.MCP.CleanUp.Core.Domain.Decision.Verdict.get -> Snail.MCP.CleanUp.Core.Domain.Verdict
-Snail.MCP.CleanUp.Core.Domain.Decision.Verdict.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery
-Snail.MCP.CleanUp.Core.Domain.Discovery.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Discovery!
-Snail.MCP.CleanUp.Core.Domain.Discovery.Deconstruct(out Snail.MCP.CleanUp.Core.Domain.Trace! Trace, out Snail.MCP.CleanUp.Core.Domain.Owner Owner, out System.DateTimeOffset FirstSeen, out System.DateTimeOffset LastSeen, out int Sightings) -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.Discovery(Snail.MCP.CleanUp.Core.Domain.Trace! Trace, Snail.MCP.CleanUp.Core.Domain.Owner Owner, System.DateTimeOffset FirstSeen, System.DateTimeOffset LastSeen, int Sightings) -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.Equals(Snail.MCP.CleanUp.Core.Domain.Discovery? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Discovery.FirstSeen.get -> System.DateTimeOffset
-Snail.MCP.CleanUp.Core.Domain.Discovery.FirstSeen.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.IsPresent.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Discovery.IsPresent.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.LastSeen.get -> System.DateTimeOffset
-Snail.MCP.CleanUp.Core.Domain.Discovery.LastSeen.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.Owner.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Discovery.Owner.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.Sightings.get -> int
-Snail.MCP.CleanUp.Core.Domain.Discovery.Sightings.init -> void
-Snail.MCP.CleanUp.Core.Domain.Discovery.Trace.get -> Snail.MCP.CleanUp.Core.Domain.Trace!
-Snail.MCP.CleanUp.Core.Domain.Discovery.Trace.init -> void
-Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.Ancestry = 2 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.Appeared = 1 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.Environment = 3 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.Label = 4 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.Ledger = 5 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Evidence.None = 0 -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.EvidenceStrength
-Snail.MCP.CleanUp.Core.Domain.Glob
-Snail.MCP.CleanUp.Core.Domain.Holding
-Snail.MCP.CleanUp.Core.Domain.Holding.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Holding!
-Snail.MCP.CleanUp.Core.Domain.Holding.Deconstruct(out string! ResourceId, out Snail.MCP.CleanUp.Core.Domain.Owner Owner, out Snail.MCP.CleanUp.Core.Domain.Evidence Evidence, out System.DateTimeOffset RecordedAt, out string! Title) -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.Equals(Snail.MCP.CleanUp.Core.Domain.Holding? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Holding.Evidence.get -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Holding.Evidence.init -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.Holding(string! ResourceId, Snail.MCP.CleanUp.Core.Domain.Owner Owner, Snail.MCP.CleanUp.Core.Domain.Evidence Evidence, System.DateTimeOffset RecordedAt, string! Title) -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.IsKept.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Holding.KeptBecause.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Holding.KeptBecause.init -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.Owner.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Holding.Owner.init -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.RecordedAt.get -> System.DateTimeOffset
-Snail.MCP.CleanUp.Core.Domain.Holding.RecordedAt.init -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.ResourceId.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Holding.ResourceId.init -> void
-Snail.MCP.CleanUp.Core.Domain.Holding.Title.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Holding.Title.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory
-Snail.MCP.CleanUp.Core.Domain.Inventory.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Inventory!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Alive.get -> System.Collections.Generic.IReadOnlySet<Snail.MCP.CleanUp.Core.Domain.Owner>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Asker.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Inventory.Asker.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Deconstruct(out System.DateTimeOffset TakenAt, out Snail.MCP.CleanUp.Core.Domain.Owner Asker, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>! Resources, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Session!>! Sessions, out System.Collections.Generic.IReadOnlyDictionary<string!, string!>! Kept, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>! Discoveries, out System.Collections.Generic.IReadOnlyDictionary<string!, string!>! Notes) -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Discoveries.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Discoveries.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Equals(Snail.MCP.CleanUp.Core.Domain.Inventory? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Inventory.Inventory(System.DateTimeOffset TakenAt, Snail.MCP.CleanUp.Core.Domain.Owner Asker, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>! Resources, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Session!>! Sessions, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! Kept, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>! Discoveries, System.Collections.Generic.IReadOnlyDictionary<string!, string!>! Notes) -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Kept.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Kept.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Notes.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Notes.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Resources.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Resources.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Sessions.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Session!>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Sessions.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.TakenAt.get -> System.DateTimeOffset
-Snail.MCP.CleanUp.Core.Domain.Inventory.TakenAt.init -> void
-Snail.MCP.CleanUp.Core.Domain.Inventory.Timings.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.TimeSpan>!
-Snail.MCP.CleanUp.Core.Domain.Inventory.Timings.init -> void
-Snail.MCP.CleanUp.Core.Domain.Kinds
-Snail.MCP.CleanUp.Core.Domain.Observation
-Snail.MCP.CleanUp.Core.Domain.Observation.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Observation!
-Snail.MCP.CleanUp.Core.Domain.Observation.Claimed.get -> System.Collections.Generic.IReadOnlyList<string!>!
-Snail.MCP.CleanUp.Core.Domain.Observation.Claimed.init -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Deconstruct(out string! Kind, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>! Resources, out System.Collections.Generic.IReadOnlyList<string!>! Claimed, out string? Note) -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Equals(Snail.MCP.CleanUp.Core.Domain.Observation? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Observation.Followed.get -> Snail.MCP.CleanUp.Core.Domain.Walk?
-Snail.MCP.CleanUp.Core.Domain.Observation.Followed.init -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Kind.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Observation.Kind.init -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Note.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Observation.Note.init -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Observation(string! Kind, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>! Resources, System.Collections.Generic.IReadOnlyList<string!>! Claimed, string? Note = null) -> void
-Snail.MCP.CleanUp.Core.Domain.Observation.Resources.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Resource!>!
-Snail.MCP.CleanUp.Core.Domain.Observation.Resources.init -> void
-Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Outcome.Changed = 2 -> Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Outcome.Failed = 3 -> Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Outcome.Gone = 1 -> Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Outcome.Released = 0 -> Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Owner.Deconstruct(out string! Kind, out string! Id) -> void
-Snail.MCP.CleanUp.Core.Domain.Owner.Equals(Snail.MCP.CleanUp.Core.Domain.Owner other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Owner.Id.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Owner.Id.init -> void
-Snail.MCP.CleanUp.Core.Domain.Owner.IsKnown.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Owner.Kind.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Owner.Kind.init -> void
-Snail.MCP.CleanUp.Core.Domain.Owner.Owner() -> void
-Snail.MCP.CleanUp.Core.Domain.Owner.Owner(string! Kind, string! Id) -> void
-Snail.MCP.CleanUp.Core.Domain.Plan
-Snail.MCP.CleanUp.Core.Domain.Plan.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Plan!
-Snail.MCP.CleanUp.Core.Domain.Plan.Asker.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Plan.Asker.init -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Decisions.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>!
-Snail.MCP.CleanUp.Core.Domain.Plan.Decisions.init -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Deconstruct(out string! Id, out Snail.MCP.CleanUp.Core.Domain.Owner Asker, out Snail.MCP.CleanUp.Core.Domain.Scope Scope, out System.DateTimeOffset MadeAt, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>! Decisions, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>! Discoveries) -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Discoveries.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>!
-Snail.MCP.CleanUp.Core.Domain.Plan.Discoveries.init -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Equals(Snail.MCP.CleanUp.Core.Domain.Plan? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Plan.Id.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Plan.Id.init -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.IsFresh(System.DateTimeOffset now) -> bool
-Snail.MCP.CleanUp.Core.Domain.Plan.MadeAt.get -> System.DateTimeOffset
-Snail.MCP.CleanUp.Core.Domain.Plan.MadeAt.init -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Plan(string! Id, Snail.MCP.CleanUp.Core.Domain.Owner Asker, Snail.MCP.CleanUp.Core.Domain.Scope Scope, System.DateTimeOffset MadeAt, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>! Decisions, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Discovery!>! Discoveries) -> void
-Snail.MCP.CleanUp.Core.Domain.Plan.Removals.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>!
-Snail.MCP.CleanUp.Core.Domain.Plan.Scope.get -> Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Plan.Scope.init -> void
-Snail.MCP.CleanUp.Core.Domain.Release
-Snail.MCP.CleanUp.Core.Domain.Release.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Release!
-Snail.MCP.CleanUp.Core.Domain.Release.Bytes.get -> long?
-Snail.MCP.CleanUp.Core.Domain.Release.Bytes.init -> void
-Snail.MCP.CleanUp.Core.Domain.Release.Deconstruct(out string! ResourceId, out Snail.MCP.CleanUp.Core.Domain.Outcome Outcome, out string! Detail, out long? Bytes) -> void
-Snail.MCP.CleanUp.Core.Domain.Release.Detail.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Release.Detail.init -> void
-Snail.MCP.CleanUp.Core.Domain.Release.Equals(Snail.MCP.CleanUp.Core.Domain.Release? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Release.IsAtLeast.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Release.IsAtLeast.init -> void
-Snail.MCP.CleanUp.Core.Domain.Release.Outcome.get -> Snail.MCP.CleanUp.Core.Domain.Outcome
-Snail.MCP.CleanUp.Core.Domain.Release.Outcome.init -> void
-Snail.MCP.CleanUp.Core.Domain.Release.Release(string! ResourceId, Snail.MCP.CleanUp.Core.Domain.Outcome Outcome, string! Detail, long? Bytes = null) -> void
-Snail.MCP.CleanUp.Core.Domain.Release.ResourceId.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Release.ResourceId.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource
-Snail.MCP.CleanUp.Core.Domain.Resource.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Resource!
-Snail.MCP.CleanUp.Core.Domain.Resource.After.get -> System.Collections.Generic.IReadOnlyList<string!>!
-Snail.MCP.CleanUp.Core.Domain.Resource.After.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Blocker.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Resource.Blocker.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Bytes.get -> long?
-Snail.MCP.CleanUp.Core.Domain.Resource.Bytes.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.CreatedAt.get -> System.DateTimeOffset?
-Snail.MCP.CleanUp.Core.Domain.Resource.CreatedAt.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Equals(Snail.MCP.CleanUp.Core.Domain.Resource? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Resource.Evidence.get -> Snail.MCP.CleanUp.Core.Domain.Evidence
-Snail.MCP.CleanUp.Core.Domain.Resource.Evidence.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Facts.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
-Snail.MCP.CleanUp.Core.Domain.Resource.Facts.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Id.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Resource.IsAtLeast.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Resource.IsAtLeast.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.IsRegenerable.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Resource.IsRegenerable.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.IsShared.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Resource.IsShared.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Key.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Resource.Key.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Kind.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Resource.Kind.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Owner.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Resource.Owner.init -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Resource() -> void
-Snail.MCP.CleanUp.Core.Domain.Resource.Title.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Resource.Title.init -> void
-Snail.MCP.CleanUp.Core.Domain.Rule
-Snail.MCP.CleanUp.Core.Domain.Rule.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Rule!
-Snail.MCP.CleanUp.Core.Domain.Rule.Action.get -> Snail.MCP.CleanUp.Core.Domain.RuleAction
-Snail.MCP.CleanUp.Core.Domain.Rule.Action.init -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.BlockedWhileRunning.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Rule.BlockedWhileRunning.init -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.Deconstruct(out string! Trail, out string! Pattern, out Snail.MCP.CleanUp.Core.Domain.RuleAction Action) -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.Equals(Snail.MCP.CleanUp.Core.Domain.Rule? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Rule.Matches(Snail.MCP.CleanUp.Core.Domain.Trace! trace) -> bool
-Snail.MCP.CleanUp.Core.Domain.Rule.Note.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Rule.Note.init -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.Pattern.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Rule.Pattern.init -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.Rule(string! Trail, string! Pattern, Snail.MCP.CleanUp.Core.Domain.RuleAction Action) -> void
-Snail.MCP.CleanUp.Core.Domain.Rule.Trail.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Rule.Trail.init -> void
-Snail.MCP.CleanUp.Core.Domain.RuleAction
-Snail.MCP.CleanUp.Core.Domain.RuleAction.Cache = 2 -> Snail.MCP.CleanUp.Core.Domain.RuleAction
-Snail.MCP.CleanUp.Core.Domain.RuleAction.Ignore = 0 -> Snail.MCP.CleanUp.Core.Domain.RuleAction
-Snail.MCP.CleanUp.Core.Domain.RuleAction.Report = 1 -> Snail.MCP.CleanUp.Core.Domain.RuleAction
-Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Scope.Caches = 2 -> Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Scope.Everything = 3 -> Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Scope.Mine = 0 -> Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Scope.Orphans = 1 -> Snail.MCP.CleanUp.Core.Domain.Scope
-Snail.MCP.CleanUp.Core.Domain.Session
-Snail.MCP.CleanUp.Core.Domain.Session.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Session!
-Snail.MCP.CleanUp.Core.Domain.Session.Deconstruct(out string! Id, out int? Pid, out System.DateTimeOffset? StartedAt, out string? Directory, out bool IsAlive) -> void
-Snail.MCP.CleanUp.Core.Domain.Session.Directory.get -> string?
-Snail.MCP.CleanUp.Core.Domain.Session.Directory.init -> void
-Snail.MCP.CleanUp.Core.Domain.Session.Equals(Snail.MCP.CleanUp.Core.Domain.Session? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Session.Id.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Session.Id.init -> void
-Snail.MCP.CleanUp.Core.Domain.Session.IsAlive.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Session.IsAlive.init -> void
-Snail.MCP.CleanUp.Core.Domain.Session.Owner.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-Snail.MCP.CleanUp.Core.Domain.Session.OwnerKind.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Session.OwnerKind.init -> void
-Snail.MCP.CleanUp.Core.Domain.Session.Pid.get -> int?
-Snail.MCP.CleanUp.Core.Domain.Session.Pid.init -> void
-Snail.MCP.CleanUp.Core.Domain.Session.Session(string! Id, int? Pid, System.DateTimeOffset? StartedAt, string? Directory, bool IsAlive) -> void
-Snail.MCP.CleanUp.Core.Domain.Session.StartedAt.get -> System.DateTimeOffset?
-Snail.MCP.CleanUp.Core.Domain.Session.StartedAt.init -> void
-Snail.MCP.CleanUp.Core.Domain.Trace
-Snail.MCP.CleanUp.Core.Domain.Trace.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Trace!
-Snail.MCP.CleanUp.Core.Domain.Trace.Bytes.get -> long?
-Snail.MCP.CleanUp.Core.Domain.Trace.Bytes.init -> void
-Snail.MCP.CleanUp.Core.Domain.Trace.Deconstruct(out string! Trail, out string! Key, out string! Title, out long? Bytes) -> void
-Snail.MCP.CleanUp.Core.Domain.Trace.Equals(Snail.MCP.CleanUp.Core.Domain.Trace? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Trace.Id.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Trace.IsAtLeast.get -> bool
-Snail.MCP.CleanUp.Core.Domain.Trace.IsAtLeast.init -> void
-Snail.MCP.CleanUp.Core.Domain.Trace.Key.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Trace.Title.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Trace.Title.init -> void
-Snail.MCP.CleanUp.Core.Domain.Trace.Trace(string! Trail, string! Key, string! Title, long? Bytes = null) -> void
-Snail.MCP.CleanUp.Core.Domain.Trace.Trail.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Verdict
-Snail.MCP.CleanUp.Core.Domain.Verdict.Keep = 2 -> Snail.MCP.CleanUp.Core.Domain.Verdict
-Snail.MCP.CleanUp.Core.Domain.Verdict.Remove = 0 -> Snail.MCP.CleanUp.Core.Domain.Verdict
-Snail.MCP.CleanUp.Core.Domain.Verdict.Report = 1 -> Snail.MCP.CleanUp.Core.Domain.Verdict
-Snail.MCP.CleanUp.Core.Domain.Walk
-Snail.MCP.CleanUp.Core.Domain.Walk.<Clone>$() -> Snail.MCP.CleanUp.Core.Domain.Walk!
-Snail.MCP.CleanUp.Core.Domain.Walk.Deconstruct(out string! Trail, out System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Trace!>! Traces) -> void
-Snail.MCP.CleanUp.Core.Domain.Walk.Equals(Snail.MCP.CleanUp.Core.Domain.Walk? other) -> bool
-Snail.MCP.CleanUp.Core.Domain.Walk.Traces.get -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Trace!>!
-Snail.MCP.CleanUp.Core.Domain.Walk.Traces.init -> void
-Snail.MCP.CleanUp.Core.Domain.Walk.Trail.get -> string!
-Snail.MCP.CleanUp.Core.Domain.Walk.Trail.init -> void
-Snail.MCP.CleanUp.Core.Domain.Walk.Walk(string! Trail, System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Trace!>! Traces) -> void
-static Snail.MCP.CleanUp.Core.Application.Census.Settling.get -> System.TimeSpan
-static Snail.MCP.CleanUp.Core.Application.Ordering.Of(System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>! decisions) -> System.Collections.Generic.IReadOnlyList<Snail.MCP.CleanUp.Core.Domain.Decision!>!
-static Snail.MCP.CleanUp.Core.Application.Planner.Decide(Snail.MCP.CleanUp.Core.Domain.Inventory! inventory, Snail.MCP.CleanUp.Core.Domain.Scope scope, string! id) -> Snail.MCP.CleanUp.Core.Domain.Plan!
-static Snail.MCP.CleanUp.Core.Domain.Decision.operator !=(Snail.MCP.CleanUp.Core.Domain.Decision? left, Snail.MCP.CleanUp.Core.Domain.Decision? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Decision.operator ==(Snail.MCP.CleanUp.Core.Domain.Decision? left, Snail.MCP.CleanUp.Core.Domain.Decision? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Discovery.operator !=(Snail.MCP.CleanUp.Core.Domain.Discovery? left, Snail.MCP.CleanUp.Core.Domain.Discovery? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Discovery.operator ==(Snail.MCP.CleanUp.Core.Domain.Discovery? left, Snail.MCP.CleanUp.Core.Domain.Discovery? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Discovery.Remembered.get -> System.TimeSpan
-static Snail.MCP.CleanUp.Core.Domain.EvidenceStrength.IsProof(this Snail.MCP.CleanUp.Core.Domain.Evidence evidence) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Glob.Depth(string! pattern) -> int?
-static Snail.MCP.CleanUp.Core.Domain.Glob.Expanded(string! pattern) -> string!
-static Snail.MCP.CleanUp.Core.Domain.Glob.Matches(string! pattern, string! path) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Glob.Root(string! pattern) -> string!
-static Snail.MCP.CleanUp.Core.Domain.Holding.operator !=(Snail.MCP.CleanUp.Core.Domain.Holding? left, Snail.MCP.CleanUp.Core.Domain.Holding? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Holding.operator ==(Snail.MCP.CleanUp.Core.Domain.Holding? left, Snail.MCP.CleanUp.Core.Domain.Holding? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Inventory.operator !=(Snail.MCP.CleanUp.Core.Domain.Inventory? left, Snail.MCP.CleanUp.Core.Domain.Inventory? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Inventory.operator ==(Snail.MCP.CleanUp.Core.Domain.Inventory? left, Snail.MCP.CleanUp.Core.Domain.Inventory? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Kinds.Order.get -> System.Collections.Generic.IReadOnlyList<string!>!
-static Snail.MCP.CleanUp.Core.Domain.Kinds.Rank(string! kind) -> int
-static Snail.MCP.CleanUp.Core.Domain.Observation.operator !=(Snail.MCP.CleanUp.Core.Domain.Observation? left, Snail.MCP.CleanUp.Core.Domain.Observation? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Observation.operator ==(Snail.MCP.CleanUp.Core.Domain.Observation? left, Snail.MCP.CleanUp.Core.Domain.Observation? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Observation.Unseen(string! kind, string! note) -> Snail.MCP.CleanUp.Core.Domain.Observation!
-static Snail.MCP.CleanUp.Core.Domain.Owner.Nobody.get -> Snail.MCP.CleanUp.Core.Domain.Owner
-static Snail.MCP.CleanUp.Core.Domain.Owner.operator !=(Snail.MCP.CleanUp.Core.Domain.Owner left, Snail.MCP.CleanUp.Core.Domain.Owner right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Owner.operator ==(Snail.MCP.CleanUp.Core.Domain.Owner left, Snail.MCP.CleanUp.Core.Domain.Owner right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Owner.Parse(string? text) -> Snail.MCP.CleanUp.Core.Domain.Owner
-static Snail.MCP.CleanUp.Core.Domain.Owner.Session(string! id) -> Snail.MCP.CleanUp.Core.Domain.Owner
-static Snail.MCP.CleanUp.Core.Domain.Owner.Task(string! id) -> Snail.MCP.CleanUp.Core.Domain.Owner
-static Snail.MCP.CleanUp.Core.Domain.Plan.Lifetime.get -> System.TimeSpan
-static Snail.MCP.CleanUp.Core.Domain.Plan.operator !=(Snail.MCP.CleanUp.Core.Domain.Plan? left, Snail.MCP.CleanUp.Core.Domain.Plan? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Plan.operator ==(Snail.MCP.CleanUp.Core.Domain.Plan? left, Snail.MCP.CleanUp.Core.Domain.Plan? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Release.AlreadyGone(Snail.MCP.CleanUp.Core.Domain.Resource! resource) -> Snail.MCP.CleanUp.Core.Domain.Release!
-static Snail.MCP.CleanUp.Core.Domain.Release.Done(Snail.MCP.CleanUp.Core.Domain.Resource! resource, string! detail) -> Snail.MCP.CleanUp.Core.Domain.Release!
-static Snail.MCP.CleanUp.Core.Domain.Release.NotTheSame(Snail.MCP.CleanUp.Core.Domain.Resource! resource, string! detail) -> Snail.MCP.CleanUp.Core.Domain.Release!
-static Snail.MCP.CleanUp.Core.Domain.Release.operator !=(Snail.MCP.CleanUp.Core.Domain.Release? left, Snail.MCP.CleanUp.Core.Domain.Release? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Release.operator ==(Snail.MCP.CleanUp.Core.Domain.Release? left, Snail.MCP.CleanUp.Core.Domain.Release? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Release.Refused(Snail.MCP.CleanUp.Core.Domain.Resource! resource, string! detail) -> Snail.MCP.CleanUp.Core.Domain.Release!
-static Snail.MCP.CleanUp.Core.Domain.Resource.operator !=(Snail.MCP.CleanUp.Core.Domain.Resource? left, Snail.MCP.CleanUp.Core.Domain.Resource? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Resource.operator ==(Snail.MCP.CleanUp.Core.Domain.Resource? left, Snail.MCP.CleanUp.Core.Domain.Resource? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Rule.operator !=(Snail.MCP.CleanUp.Core.Domain.Rule? left, Snail.MCP.CleanUp.Core.Domain.Rule? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Rule.operator ==(Snail.MCP.CleanUp.Core.Domain.Rule? left, Snail.MCP.CleanUp.Core.Domain.Rule? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Session.operator !=(Snail.MCP.CleanUp.Core.Domain.Session? left, Snail.MCP.CleanUp.Core.Domain.Session? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Session.operator ==(Snail.MCP.CleanUp.Core.Domain.Session? left, Snail.MCP.CleanUp.Core.Domain.Session? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Trace.operator !=(Snail.MCP.CleanUp.Core.Domain.Trace? left, Snail.MCP.CleanUp.Core.Domain.Trace? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Trace.operator ==(Snail.MCP.CleanUp.Core.Domain.Trace? left, Snail.MCP.CleanUp.Core.Domain.Trace? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Walk.operator !=(Snail.MCP.CleanUp.Core.Domain.Walk? left, Snail.MCP.CleanUp.Core.Domain.Walk? right) -> bool
-static Snail.MCP.CleanUp.Core.Domain.Walk.operator ==(Snail.MCP.CleanUp.Core.Domain.Walk? left, Snail.MCP.CleanUp.Core.Domain.Walk? right) -> bool
-~override Snail.MCP.CleanUp.Core.Domain.Owner.Equals(object obj) -> bool
+const Snail.Toolkit.Cleanup.Domain.Kinds.Container = "container" -> string!
+const Snail.Toolkit.Cleanup.Domain.Kinds.File = "file" -> string!
+const Snail.Toolkit.Cleanup.Domain.Kinds.Image = "image" -> string!
+const Snail.Toolkit.Cleanup.Domain.Kinds.Network = "network" -> string!
+const Snail.Toolkit.Cleanup.Domain.Kinds.Process = "process" -> string!
+const Snail.Toolkit.Cleanup.Domain.Kinds.Volume = "volume" -> string!
+override Snail.Toolkit.Cleanup.Domain.Decision.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Decision.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Decision.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Discovery.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Discovery.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Discovery.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Holder.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Holder.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Holder.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Holding.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Holding.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Holding.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Inventory.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Inventory.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Inventory.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Observation.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Observation.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Observation.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Owner.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Owner.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Plan.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Plan.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Plan.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Release.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Release.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Release.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Resource.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Resource.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Resource.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Rule.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Rule.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Rule.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Trace.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Trace.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Trace.ToString() -> string!
+override Snail.Toolkit.Cleanup.Domain.Walk.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Domain.Walk.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Domain.Walk.ToString() -> string!
+Snail.Toolkit.Cleanup.Adapters.JsonRules
+Snail.Toolkit.Cleanup.Adapters.JsonRules.AddAsync(Snail.Toolkit.Cleanup.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Adapters.JsonRules.JsonRules(string! path, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>! shipped) -> void
+Snail.Toolkit.Cleanup.Adapters.JsonRules.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>!>!
+Snail.Toolkit.Cleanup.Application.Census
+Snail.Toolkit.Cleanup.Application.Census.Census(System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.IResourceKind!>! kinds, System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.ITrail!>! trails, Snail.Toolkit.Cleanup.Application.Ports.IHolders! holders, Snail.Toolkit.Cleanup.Application.Ports.ILedger! ledger, Snail.Toolkit.Cleanup.Application.Ports.IRules! rules, Snail.Toolkit.Cleanup.Application.Ports.IBaselines! baselines, Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries! discoveries, System.TimeProvider! clock) -> void
+Snail.Toolkit.Cleanup.Application.Census.TakeAsync(Snail.Toolkit.Cleanup.Domain.Owner asker, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Inventory!>!
+Snail.Toolkit.Cleanup.Application.Cleaner
+Snail.Toolkit.Cleanup.Application.Cleaner.ApplyAsync(Snail.Toolkit.Cleanup.Domain.Plan! plan, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Release!>!>!
+Snail.Toolkit.Cleanup.Application.Cleaner.Cleaner(System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.IResourceKind!>! kinds, Snail.Toolkit.Cleanup.Application.Ports.ILedger! ledger) -> void
+Snail.Toolkit.Cleanup.Application.NoLedger
+Snail.Toolkit.Cleanup.Application.NoLedger.ForgetAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.NoLedger.HoldingsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holding!>!>!
+Snail.Toolkit.Cleanup.Application.NoLedger.KeepAsync(string! resourceId, string! reason, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.NoLedger.KeptAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
+Snail.Toolkit.Cleanup.Application.NoLedger.NoLedger() -> void
+Snail.Toolkit.Cleanup.Application.NoLedger.RecordAsync(Snail.Toolkit.Cleanup.Domain.Holding! holding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.NoLedger.TryUnkeepAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
+Snail.Toolkit.Cleanup.Application.Ordering
+Snail.Toolkit.Cleanup.Application.Planner
+Snail.Toolkit.Cleanup.Application.Ports.IBaselines
+Snail.Toolkit.Cleanup.Application.Ports.IBaselines.FindAsync(Snail.Toolkit.Cleanup.Domain.Owner owner, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Baseline?>!
+Snail.Toolkit.Cleanup.Application.Ports.IBaselines.KeepOnlyAsync(System.Collections.Generic.IReadOnlySet<Snail.Toolkit.Cleanup.Domain.Owner>! owners, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.IBaselines.SaveAsync(Snail.Toolkit.Cleanup.Domain.Owner owner, System.Collections.Generic.IReadOnlyList<string!>! traceIds, System.DateTimeOffset takenAt, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries
+Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries.ListAsync(System.Collections.Generic.IReadOnlySet<string!>! present, System.DateTimeOffset now, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries.NoteAsync(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>! discoveries, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries.SettleAsync(Snail.Toolkit.Cleanup.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
+Snail.Toolkit.Cleanup.Application.Ports.IHolders
+Snail.Toolkit.Cleanup.Application.Ports.IHolders.CurrentAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Owner>!
+Snail.Toolkit.Cleanup.Application.Ports.IHolders.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.ForgetAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.HoldingsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holding!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.KeepAsync(string! resourceId, string! reason, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.KeptAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.RecordAsync(Snail.Toolkit.Cleanup.Domain.Holding! holding, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.ILedger.TryUnkeepAsync(string! resourceId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
+Snail.Toolkit.Cleanup.Application.Ports.IPlans
+Snail.Toolkit.Cleanup.Application.Ports.IPlans.FindAsync(string! id, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Plan?>!
+Snail.Toolkit.Cleanup.Application.Ports.IPlans.SaveAsync(Snail.Toolkit.Cleanup.Domain.Plan! plan, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.IResourceKind
+Snail.Toolkit.Cleanup.Application.Ports.IResourceKind.Name.get -> string!
+Snail.Toolkit.Cleanup.Application.Ports.IResourceKind.ObserveAsync(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>! holders, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Observation!>!
+Snail.Toolkit.Cleanup.Application.Ports.IResourceKind.ReleaseAsync(Snail.Toolkit.Cleanup.Domain.Resource! resource, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Release!>!
+Snail.Toolkit.Cleanup.Application.Ports.IRules
+Snail.Toolkit.Cleanup.Application.Ports.IRules.AddAsync(Snail.Toolkit.Cleanup.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Snail.Toolkit.Cleanup.Application.Ports.IRules.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.ITrail
+Snail.Toolkit.Cleanup.Application.Ports.ITrail.FollowAsync(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>! rules, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Trace!>!>!
+Snail.Toolkit.Cleanup.Application.Ports.ITrail.MeasureAsync(Snail.Toolkit.Cleanup.Domain.Trace! trace, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Trace!>!
+Snail.Toolkit.Cleanup.Application.Ports.ITrail.Name.get -> string!
+Snail.Toolkit.Cleanup.Domain.Baseline
+Snail.Toolkit.Cleanup.Domain.Baseline.Add(string! traceId) -> void
+Snail.Toolkit.Cleanup.Domain.Baseline.Baseline() -> void
+Snail.Toolkit.Cleanup.Domain.Baseline.Contains(string! traceId) -> bool
+Snail.Toolkit.Cleanup.Domain.Baseline.Count.get -> int
+Snail.Toolkit.Cleanup.Domain.Decision
+Snail.Toolkit.Cleanup.Domain.Decision.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Decision!
+Snail.Toolkit.Cleanup.Domain.Decision.Decision(Snail.Toolkit.Cleanup.Domain.Resource! Resource, Snail.Toolkit.Cleanup.Domain.Verdict Verdict, string! Reason) -> void
+Snail.Toolkit.Cleanup.Domain.Decision.Deconstruct(out Snail.Toolkit.Cleanup.Domain.Resource! Resource, out Snail.Toolkit.Cleanup.Domain.Verdict Verdict, out string! Reason) -> void
+Snail.Toolkit.Cleanup.Domain.Decision.Equals(Snail.Toolkit.Cleanup.Domain.Decision? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Decision.Reason.get -> string!
+Snail.Toolkit.Cleanup.Domain.Decision.Reason.init -> void
+Snail.Toolkit.Cleanup.Domain.Decision.Resource.get -> Snail.Toolkit.Cleanup.Domain.Resource!
+Snail.Toolkit.Cleanup.Domain.Decision.Resource.init -> void
+Snail.Toolkit.Cleanup.Domain.Decision.Verdict.get -> Snail.Toolkit.Cleanup.Domain.Verdict
+Snail.Toolkit.Cleanup.Domain.Decision.Verdict.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery
+Snail.Toolkit.Cleanup.Domain.Discovery.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Discovery!
+Snail.Toolkit.Cleanup.Domain.Discovery.Deconstruct(out Snail.Toolkit.Cleanup.Domain.Trace! Trace, out Snail.Toolkit.Cleanup.Domain.Owner Owner, out System.DateTimeOffset FirstSeen, out System.DateTimeOffset LastSeen, out int Sightings) -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.Discovery(Snail.Toolkit.Cleanup.Domain.Trace! Trace, Snail.Toolkit.Cleanup.Domain.Owner Owner, System.DateTimeOffset FirstSeen, System.DateTimeOffset LastSeen, int Sightings) -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.Equals(Snail.Toolkit.Cleanup.Domain.Discovery? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Discovery.FirstSeen.get -> System.DateTimeOffset
+Snail.Toolkit.Cleanup.Domain.Discovery.FirstSeen.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.IsPresent.get -> bool
+Snail.Toolkit.Cleanup.Domain.Discovery.IsPresent.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.LastSeen.get -> System.DateTimeOffset
+Snail.Toolkit.Cleanup.Domain.Discovery.LastSeen.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.Owner.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Discovery.Owner.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.Sightings.get -> int
+Snail.Toolkit.Cleanup.Domain.Discovery.Sightings.init -> void
+Snail.Toolkit.Cleanup.Domain.Discovery.Trace.get -> Snail.Toolkit.Cleanup.Domain.Trace!
+Snail.Toolkit.Cleanup.Domain.Discovery.Trace.init -> void
+Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.Ancestry = 2 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.Appeared = 1 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.Environment = 3 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.Label = 4 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.Ledger = 5 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Evidence.None = 0 -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.EvidenceStrength
+Snail.Toolkit.Cleanup.Domain.Glob
+Snail.Toolkit.Cleanup.Domain.Holder
+Snail.Toolkit.Cleanup.Domain.Holder.Deconstruct(out Snail.Toolkit.Cleanup.Domain.Owner Owner, out bool IsAlive) -> void
+Snail.Toolkit.Cleanup.Domain.Holder.Directory.get -> string?
+Snail.Toolkit.Cleanup.Domain.Holder.Directory.init -> void
+Snail.Toolkit.Cleanup.Domain.Holder.EndedAt.get -> System.DateTimeOffset?
+Snail.Toolkit.Cleanup.Domain.Holder.EndedAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Holder.Holder(Snail.Toolkit.Cleanup.Domain.Holder! original) -> void
+Snail.Toolkit.Cleanup.Domain.Holder.Holder(Snail.Toolkit.Cleanup.Domain.Owner Owner, bool IsAlive) -> void
+Snail.Toolkit.Cleanup.Domain.Holder.IsAlive.get -> bool
+Snail.Toolkit.Cleanup.Domain.Holder.IsAlive.init -> void
+Snail.Toolkit.Cleanup.Domain.Holder.Owner.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Holder.Owner.init -> void
+Snail.Toolkit.Cleanup.Domain.Holder.StartedAt.get -> System.DateTimeOffset?
+Snail.Toolkit.Cleanup.Domain.Holder.StartedAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding
+Snail.Toolkit.Cleanup.Domain.Holding.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Holding!
+Snail.Toolkit.Cleanup.Domain.Holding.Deconstruct(out string! ResourceId, out Snail.Toolkit.Cleanup.Domain.Owner Owner, out Snail.Toolkit.Cleanup.Domain.Evidence Evidence, out System.DateTimeOffset RecordedAt, out string! Title) -> void
+Snail.Toolkit.Cleanup.Domain.Holding.Equals(Snail.Toolkit.Cleanup.Domain.Holding? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Holding.Evidence.get -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Holding.Evidence.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding.Holding(string! ResourceId, Snail.Toolkit.Cleanup.Domain.Owner Owner, Snail.Toolkit.Cleanup.Domain.Evidence Evidence, System.DateTimeOffset RecordedAt, string! Title) -> void
+Snail.Toolkit.Cleanup.Domain.Holding.IsKept.get -> bool
+Snail.Toolkit.Cleanup.Domain.Holding.KeptBecause.get -> string?
+Snail.Toolkit.Cleanup.Domain.Holding.KeptBecause.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding.Owner.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Holding.Owner.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding.RecordedAt.get -> System.DateTimeOffset
+Snail.Toolkit.Cleanup.Domain.Holding.RecordedAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding.ResourceId.get -> string!
+Snail.Toolkit.Cleanup.Domain.Holding.ResourceId.init -> void
+Snail.Toolkit.Cleanup.Domain.Holding.Title.get -> string!
+Snail.Toolkit.Cleanup.Domain.Holding.Title.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory
+Snail.Toolkit.Cleanup.Domain.Inventory.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Inventory!
+Snail.Toolkit.Cleanup.Domain.Inventory.Alive.get -> System.Collections.Generic.IReadOnlySet<Snail.Toolkit.Cleanup.Domain.Owner>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Asker.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Inventory.Asker.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Deconstruct(out System.DateTimeOffset TakenAt, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>! Resources, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>! Holders) -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Discoveries.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Discoveries.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Equals(Snail.Toolkit.Cleanup.Domain.Inventory? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Inventory.Holders.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Holders.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Inventory(System.DateTimeOffset TakenAt, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>! Resources, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>! Holders) -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Kept.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Kept.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Notes.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Notes.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Resources.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Resources.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.TakenAt.get -> System.DateTimeOffset
+Snail.Toolkit.Cleanup.Domain.Inventory.TakenAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Inventory.Timings.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.TimeSpan>!
+Snail.Toolkit.Cleanup.Domain.Inventory.Timings.init -> void
+Snail.Toolkit.Cleanup.Domain.KindOrder
+Snail.Toolkit.Cleanup.Domain.KindOrder.After(string! kind, params string![]! kinds) -> Snail.Toolkit.Cleanup.Domain.KindOrder!
+Snail.Toolkit.Cleanup.Domain.KindOrder.Before(string! kind, params string![]! kinds) -> Snail.Toolkit.Cleanup.Domain.KindOrder!
+Snail.Toolkit.Cleanup.Domain.KindOrder.KindOrder(System.Collections.Generic.IEnumerable<string!>! kinds) -> void
+Snail.Toolkit.Cleanup.Domain.KindOrder.Listed.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Snail.Toolkit.Cleanup.Domain.KindOrder.Rank(string! kind) -> int
+Snail.Toolkit.Cleanup.Domain.Kinds
+Snail.Toolkit.Cleanup.Domain.Observation
+Snail.Toolkit.Cleanup.Domain.Observation.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Observation!
+Snail.Toolkit.Cleanup.Domain.Observation.Claimed.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Snail.Toolkit.Cleanup.Domain.Observation.Claimed.init -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Deconstruct(out string! Kind, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>! Resources, out System.Collections.Generic.IReadOnlyList<string!>! Claimed, out string? Note) -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Equals(Snail.Toolkit.Cleanup.Domain.Observation? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Observation.Followed.get -> Snail.Toolkit.Cleanup.Domain.Walk?
+Snail.Toolkit.Cleanup.Domain.Observation.Followed.init -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Kind.get -> string!
+Snail.Toolkit.Cleanup.Domain.Observation.Kind.init -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Note.get -> string?
+Snail.Toolkit.Cleanup.Domain.Observation.Note.init -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Observation(string! Kind, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>! Resources, System.Collections.Generic.IReadOnlyList<string!>! Claimed, string? Note = null) -> void
+Snail.Toolkit.Cleanup.Domain.Observation.Resources.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Resource!>!
+Snail.Toolkit.Cleanup.Domain.Observation.Resources.init -> void
+Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Outcome.Changed = 2 -> Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Outcome.Failed = 3 -> Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Outcome.Gone = 1 -> Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Outcome.Released = 0 -> Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Owner.Deconstruct(out string! Kind, out string! Id) -> void
+Snail.Toolkit.Cleanup.Domain.Owner.Equals(Snail.Toolkit.Cleanup.Domain.Owner other) -> bool
+Snail.Toolkit.Cleanup.Domain.Owner.Id.get -> string!
+Snail.Toolkit.Cleanup.Domain.Owner.Id.init -> void
+Snail.Toolkit.Cleanup.Domain.Owner.IsKnown.get -> bool
+Snail.Toolkit.Cleanup.Domain.Owner.Kind.get -> string!
+Snail.Toolkit.Cleanup.Domain.Owner.Kind.init -> void
+Snail.Toolkit.Cleanup.Domain.Owner.Owner() -> void
+Snail.Toolkit.Cleanup.Domain.Owner.Owner(string! Kind, string! Id) -> void
+Snail.Toolkit.Cleanup.Domain.Plan
+Snail.Toolkit.Cleanup.Domain.Plan.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Plan!
+Snail.Toolkit.Cleanup.Domain.Plan.Asker.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Plan.Asker.init -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Decisions.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>!
+Snail.Toolkit.Cleanup.Domain.Plan.Decisions.init -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Deconstruct(out string! Id, out Snail.Toolkit.Cleanup.Domain.Owner Asker, out Snail.Toolkit.Cleanup.Domain.Scope Scope, out System.DateTimeOffset MadeAt, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>! Decisions, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>! Discoveries) -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Discoveries.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>!
+Snail.Toolkit.Cleanup.Domain.Plan.Discoveries.init -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Equals(Snail.Toolkit.Cleanup.Domain.Plan? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Plan.Id.get -> string!
+Snail.Toolkit.Cleanup.Domain.Plan.Id.init -> void
+Snail.Toolkit.Cleanup.Domain.Plan.IsFresh(System.DateTimeOffset now) -> bool
+Snail.Toolkit.Cleanup.Domain.Plan.MadeAt.get -> System.DateTimeOffset
+Snail.Toolkit.Cleanup.Domain.Plan.MadeAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Plan(string! Id, Snail.Toolkit.Cleanup.Domain.Owner Asker, Snail.Toolkit.Cleanup.Domain.Scope Scope, System.DateTimeOffset MadeAt, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>! Decisions, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Discovery!>! Discoveries) -> void
+Snail.Toolkit.Cleanup.Domain.Plan.Removals.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>!
+Snail.Toolkit.Cleanup.Domain.Plan.Scope.get -> Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Plan.Scope.init -> void
+Snail.Toolkit.Cleanup.Domain.Release
+Snail.Toolkit.Cleanup.Domain.Release.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Release!
+Snail.Toolkit.Cleanup.Domain.Release.Bytes.get -> long?
+Snail.Toolkit.Cleanup.Domain.Release.Bytes.init -> void
+Snail.Toolkit.Cleanup.Domain.Release.Deconstruct(out string! ResourceId, out Snail.Toolkit.Cleanup.Domain.Outcome Outcome, out string! Detail, out long? Bytes) -> void
+Snail.Toolkit.Cleanup.Domain.Release.Detail.get -> string!
+Snail.Toolkit.Cleanup.Domain.Release.Detail.init -> void
+Snail.Toolkit.Cleanup.Domain.Release.Equals(Snail.Toolkit.Cleanup.Domain.Release? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Release.IsAtLeast.get -> bool
+Snail.Toolkit.Cleanup.Domain.Release.IsAtLeast.init -> void
+Snail.Toolkit.Cleanup.Domain.Release.Outcome.get -> Snail.Toolkit.Cleanup.Domain.Outcome
+Snail.Toolkit.Cleanup.Domain.Release.Outcome.init -> void
+Snail.Toolkit.Cleanup.Domain.Release.Release(string! ResourceId, Snail.Toolkit.Cleanup.Domain.Outcome Outcome, string! Detail, long? Bytes = null) -> void
+Snail.Toolkit.Cleanup.Domain.Release.ResourceId.get -> string!
+Snail.Toolkit.Cleanup.Domain.Release.ResourceId.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource
+Snail.Toolkit.Cleanup.Domain.Resource.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Resource!
+Snail.Toolkit.Cleanup.Domain.Resource.After.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Snail.Toolkit.Cleanup.Domain.Resource.After.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Blocker.get -> string?
+Snail.Toolkit.Cleanup.Domain.Resource.Blocker.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Bytes.get -> long?
+Snail.Toolkit.Cleanup.Domain.Resource.Bytes.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.CreatedAt.get -> System.DateTimeOffset?
+Snail.Toolkit.Cleanup.Domain.Resource.CreatedAt.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Equals(Snail.Toolkit.Cleanup.Domain.Resource? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Resource.Evidence.get -> Snail.Toolkit.Cleanup.Domain.Evidence
+Snail.Toolkit.Cleanup.Domain.Resource.Evidence.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Facts.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+Snail.Toolkit.Cleanup.Domain.Resource.Facts.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Id.get -> string!
+Snail.Toolkit.Cleanup.Domain.Resource.IsAtLeast.get -> bool
+Snail.Toolkit.Cleanup.Domain.Resource.IsAtLeast.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.IsRegenerable.get -> bool
+Snail.Toolkit.Cleanup.Domain.Resource.IsRegenerable.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.IsShared.get -> bool
+Snail.Toolkit.Cleanup.Domain.Resource.IsShared.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Key.get -> string!
+Snail.Toolkit.Cleanup.Domain.Resource.Key.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Kind.get -> string!
+Snail.Toolkit.Cleanup.Domain.Resource.Kind.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Owner.get -> Snail.Toolkit.Cleanup.Domain.Owner
+Snail.Toolkit.Cleanup.Domain.Resource.Owner.init -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Resource() -> void
+Snail.Toolkit.Cleanup.Domain.Resource.Title.get -> string!
+Snail.Toolkit.Cleanup.Domain.Resource.Title.init -> void
+Snail.Toolkit.Cleanup.Domain.Rule
+Snail.Toolkit.Cleanup.Domain.Rule.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Rule!
+Snail.Toolkit.Cleanup.Domain.Rule.Action.get -> Snail.Toolkit.Cleanup.Domain.RuleAction
+Snail.Toolkit.Cleanup.Domain.Rule.Action.init -> void
+Snail.Toolkit.Cleanup.Domain.Rule.BlockedWhileRunning.get -> string?
+Snail.Toolkit.Cleanup.Domain.Rule.BlockedWhileRunning.init -> void
+Snail.Toolkit.Cleanup.Domain.Rule.Deconstruct(out string! Trail, out string! Pattern, out Snail.Toolkit.Cleanup.Domain.RuleAction Action) -> void
+Snail.Toolkit.Cleanup.Domain.Rule.Equals(Snail.Toolkit.Cleanup.Domain.Rule? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Rule.Matches(Snail.Toolkit.Cleanup.Domain.Trace! trace) -> bool
+Snail.Toolkit.Cleanup.Domain.Rule.Note.get -> string?
+Snail.Toolkit.Cleanup.Domain.Rule.Note.init -> void
+Snail.Toolkit.Cleanup.Domain.Rule.Pattern.get -> string!
+Snail.Toolkit.Cleanup.Domain.Rule.Pattern.init -> void
+Snail.Toolkit.Cleanup.Domain.Rule.Rule(string! Trail, string! Pattern, Snail.Toolkit.Cleanup.Domain.RuleAction Action) -> void
+Snail.Toolkit.Cleanup.Domain.Rule.Trail.get -> string!
+Snail.Toolkit.Cleanup.Domain.Rule.Trail.init -> void
+Snail.Toolkit.Cleanup.Domain.RuleAction
+Snail.Toolkit.Cleanup.Domain.RuleAction.Cache = 2 -> Snail.Toolkit.Cleanup.Domain.RuleAction
+Snail.Toolkit.Cleanup.Domain.RuleAction.Ignore = 0 -> Snail.Toolkit.Cleanup.Domain.RuleAction
+Snail.Toolkit.Cleanup.Domain.RuleAction.Report = 1 -> Snail.Toolkit.Cleanup.Domain.RuleAction
+Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Scope.Caches = 2 -> Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Scope.Everything = 3 -> Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Scope.Mine = 0 -> Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Scope.Orphans = 1 -> Snail.Toolkit.Cleanup.Domain.Scope
+Snail.Toolkit.Cleanup.Domain.Trace
+Snail.Toolkit.Cleanup.Domain.Trace.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Trace!
+Snail.Toolkit.Cleanup.Domain.Trace.Bytes.get -> long?
+Snail.Toolkit.Cleanup.Domain.Trace.Bytes.init -> void
+Snail.Toolkit.Cleanup.Domain.Trace.Deconstruct(out string! Trail, out string! Key, out string! Title, out long? Bytes) -> void
+Snail.Toolkit.Cleanup.Domain.Trace.Equals(Snail.Toolkit.Cleanup.Domain.Trace? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Trace.Id.get -> string!
+Snail.Toolkit.Cleanup.Domain.Trace.IsAtLeast.get -> bool
+Snail.Toolkit.Cleanup.Domain.Trace.IsAtLeast.init -> void
+Snail.Toolkit.Cleanup.Domain.Trace.Key.get -> string!
+Snail.Toolkit.Cleanup.Domain.Trace.Title.get -> string!
+Snail.Toolkit.Cleanup.Domain.Trace.Title.init -> void
+Snail.Toolkit.Cleanup.Domain.Trace.Trace(string! Trail, string! Key, string! Title, long? Bytes = null) -> void
+Snail.Toolkit.Cleanup.Domain.Trace.Trail.get -> string!
+Snail.Toolkit.Cleanup.Domain.Verdict
+Snail.Toolkit.Cleanup.Domain.Verdict.Keep = 2 -> Snail.Toolkit.Cleanup.Domain.Verdict
+Snail.Toolkit.Cleanup.Domain.Verdict.Remove = 0 -> Snail.Toolkit.Cleanup.Domain.Verdict
+Snail.Toolkit.Cleanup.Domain.Verdict.Report = 1 -> Snail.Toolkit.Cleanup.Domain.Verdict
+Snail.Toolkit.Cleanup.Domain.Walk
+Snail.Toolkit.Cleanup.Domain.Walk.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Walk!
+Snail.Toolkit.Cleanup.Domain.Walk.Deconstruct(out string! Trail, out System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Trace!>! Traces) -> void
+Snail.Toolkit.Cleanup.Domain.Walk.Equals(Snail.Toolkit.Cleanup.Domain.Walk? other) -> bool
+Snail.Toolkit.Cleanup.Domain.Walk.Traces.get -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Trace!>!
+Snail.Toolkit.Cleanup.Domain.Walk.Traces.init -> void
+Snail.Toolkit.Cleanup.Domain.Walk.Trail.get -> string!
+Snail.Toolkit.Cleanup.Domain.Walk.Trail.init -> void
+Snail.Toolkit.Cleanup.Domain.Walk.Walk(string! Trail, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Trace!>! Traces) -> void
+static Snail.Toolkit.Cleanup.Application.Census.Settling.get -> System.TimeSpan
+static Snail.Toolkit.Cleanup.Application.Ordering.Of(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>! decisions, Snail.Toolkit.Cleanup.Domain.KindOrder! order) -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>!
+static Snail.Toolkit.Cleanup.Application.Planner.Decide(Snail.Toolkit.Cleanup.Domain.Inventory! inventory, Snail.Toolkit.Cleanup.Domain.Scope scope, string! id, Snail.Toolkit.Cleanup.Domain.KindOrder! order) -> Snail.Toolkit.Cleanup.Domain.Plan!
+static Snail.Toolkit.Cleanup.Domain.Decision.operator !=(Snail.Toolkit.Cleanup.Domain.Decision? left, Snail.Toolkit.Cleanup.Domain.Decision? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Decision.operator ==(Snail.Toolkit.Cleanup.Domain.Decision? left, Snail.Toolkit.Cleanup.Domain.Decision? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Discovery.operator !=(Snail.Toolkit.Cleanup.Domain.Discovery? left, Snail.Toolkit.Cleanup.Domain.Discovery? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Discovery.operator ==(Snail.Toolkit.Cleanup.Domain.Discovery? left, Snail.Toolkit.Cleanup.Domain.Discovery? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Discovery.Remembered.get -> System.TimeSpan
+static Snail.Toolkit.Cleanup.Domain.EvidenceStrength.IsProof(this Snail.Toolkit.Cleanup.Domain.Evidence evidence) -> bool
+static Snail.Toolkit.Cleanup.Domain.Glob.Depth(string! pattern) -> int?
+static Snail.Toolkit.Cleanup.Domain.Glob.Expanded(string! pattern) -> string!
+static Snail.Toolkit.Cleanup.Domain.Glob.Matches(string! pattern, string! path) -> bool
+static Snail.Toolkit.Cleanup.Domain.Glob.Root(string! pattern) -> string!
+static Snail.Toolkit.Cleanup.Domain.Holder.operator !=(Snail.Toolkit.Cleanup.Domain.Holder? left, Snail.Toolkit.Cleanup.Domain.Holder? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Holder.operator ==(Snail.Toolkit.Cleanup.Domain.Holder? left, Snail.Toolkit.Cleanup.Domain.Holder? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Holding.operator !=(Snail.Toolkit.Cleanup.Domain.Holding? left, Snail.Toolkit.Cleanup.Domain.Holding? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Holding.operator ==(Snail.Toolkit.Cleanup.Domain.Holding? left, Snail.Toolkit.Cleanup.Domain.Holding? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Inventory.operator !=(Snail.Toolkit.Cleanup.Domain.Inventory? left, Snail.Toolkit.Cleanup.Domain.Inventory? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Inventory.operator ==(Snail.Toolkit.Cleanup.Domain.Inventory? left, Snail.Toolkit.Cleanup.Domain.Inventory? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.KindOrder.General.get -> Snail.Toolkit.Cleanup.Domain.KindOrder!
+static Snail.Toolkit.Cleanup.Domain.Observation.operator !=(Snail.Toolkit.Cleanup.Domain.Observation? left, Snail.Toolkit.Cleanup.Domain.Observation? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Observation.operator ==(Snail.Toolkit.Cleanup.Domain.Observation? left, Snail.Toolkit.Cleanup.Domain.Observation? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Observation.Unseen(string! kind, string! note) -> Snail.Toolkit.Cleanup.Domain.Observation!
+static Snail.Toolkit.Cleanup.Domain.Owner.Nobody.get -> Snail.Toolkit.Cleanup.Domain.Owner
+static Snail.Toolkit.Cleanup.Domain.Owner.operator !=(Snail.Toolkit.Cleanup.Domain.Owner left, Snail.Toolkit.Cleanup.Domain.Owner right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Owner.operator ==(Snail.Toolkit.Cleanup.Domain.Owner left, Snail.Toolkit.Cleanup.Domain.Owner right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Owner.Parse(string? text) -> Snail.Toolkit.Cleanup.Domain.Owner
+static Snail.Toolkit.Cleanup.Domain.Plan.Lifetime.get -> System.TimeSpan
+static Snail.Toolkit.Cleanup.Domain.Plan.operator !=(Snail.Toolkit.Cleanup.Domain.Plan? left, Snail.Toolkit.Cleanup.Domain.Plan? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Plan.operator ==(Snail.Toolkit.Cleanup.Domain.Plan? left, Snail.Toolkit.Cleanup.Domain.Plan? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Release.AlreadyGone(Snail.Toolkit.Cleanup.Domain.Resource! resource) -> Snail.Toolkit.Cleanup.Domain.Release!
+static Snail.Toolkit.Cleanup.Domain.Release.Done(Snail.Toolkit.Cleanup.Domain.Resource! resource, string! detail) -> Snail.Toolkit.Cleanup.Domain.Release!
+static Snail.Toolkit.Cleanup.Domain.Release.NotTheSame(Snail.Toolkit.Cleanup.Domain.Resource! resource, string! detail) -> Snail.Toolkit.Cleanup.Domain.Release!
+static Snail.Toolkit.Cleanup.Domain.Release.operator !=(Snail.Toolkit.Cleanup.Domain.Release? left, Snail.Toolkit.Cleanup.Domain.Release? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Release.operator ==(Snail.Toolkit.Cleanup.Domain.Release? left, Snail.Toolkit.Cleanup.Domain.Release? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Release.Refused(Snail.Toolkit.Cleanup.Domain.Resource! resource, string! detail) -> Snail.Toolkit.Cleanup.Domain.Release!
+static Snail.Toolkit.Cleanup.Domain.Resource.operator !=(Snail.Toolkit.Cleanup.Domain.Resource? left, Snail.Toolkit.Cleanup.Domain.Resource? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Resource.operator ==(Snail.Toolkit.Cleanup.Domain.Resource? left, Snail.Toolkit.Cleanup.Domain.Resource? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Rule.operator !=(Snail.Toolkit.Cleanup.Domain.Rule? left, Snail.Toolkit.Cleanup.Domain.Rule? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Rule.operator ==(Snail.Toolkit.Cleanup.Domain.Rule? left, Snail.Toolkit.Cleanup.Domain.Rule? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Trace.operator !=(Snail.Toolkit.Cleanup.Domain.Trace? left, Snail.Toolkit.Cleanup.Domain.Trace? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Trace.operator ==(Snail.Toolkit.Cleanup.Domain.Trace? left, Snail.Toolkit.Cleanup.Domain.Trace? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Walk.operator !=(Snail.Toolkit.Cleanup.Domain.Walk? left, Snail.Toolkit.Cleanup.Domain.Walk? right) -> bool
+static Snail.Toolkit.Cleanup.Domain.Walk.operator ==(Snail.Toolkit.Cleanup.Domain.Walk? left, Snail.Toolkit.Cleanup.Domain.Walk? right) -> bool
+virtual Snail.Toolkit.Cleanup.Domain.Holder.<Clone>$() -> Snail.Toolkit.Cleanup.Domain.Holder!
+virtual Snail.Toolkit.Cleanup.Domain.Holder.EqualityContract.get -> System.Type!
+virtual Snail.Toolkit.Cleanup.Domain.Holder.Equals(Snail.Toolkit.Cleanup.Domain.Holder? other) -> bool
+virtual Snail.Toolkit.Cleanup.Domain.Holder.PrintMembers(System.Text.StringBuilder! builder) -> bool
+~override Snail.Toolkit.Cleanup.Domain.Owner.Equals(object obj) -> bool

@@ -1,4 +1,4 @@
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Domain;
 
 namespace Snail.Toolkit.Cleanup.Tests;
 

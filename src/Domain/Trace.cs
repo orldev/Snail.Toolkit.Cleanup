@@ -1,19 +1,19 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>One thing a trail saw on the machine, before anyone has said what it is.</summary>
-/// <param name="Trail">The trail that saw it: files, processes, ports, launch agents, containers.</param>
+/// <param name="Trail">The trail that saw it: files, processes, ports, containers.</param>
 /// <param name="Key">What tells it apart within its trail, such as a path.</param>
 /// <param name="Title">What a person reads to recognise it.</param>
 /// <param name="Bytes">Space it takes, when measured.</param>
 /// <remarks>
-/// A trace is how something no kind knows about is noticed at all: every trail is followed before a session
-/// and after it, and what is new and claimed by nobody is a discovery rather than a silence.
+/// A trace is how something no kind knows about is noticed at all: every trail is followed when an owner
+/// begins and after, and what is new and claimed by nobody is a discovery rather than a silence.
 /// </remarks>
 public sealed record Trace(string Trail, string Key, string Title, long? Bytes = null)
 {
     private string? _id;
 
-    /// <summary>The trail that saw it: files, processes, ports, launch agents, containers.</summary>
+    /// <summary>The trail that saw it: files, processes, ports, containers.</summary>
     /// <remarks>Fixed once made, not even changed by <c>with</c>, because <see cref="Id"/> is made from it.</remarks>
     public string Trail { get; } = Trail;
 

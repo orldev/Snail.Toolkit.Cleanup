@@ -1,6 +1,6 @@
-namespace Snail.MCP.CleanUp.Core.Application.Ports;
+namespace Snail.Toolkit.Cleanup.Application.Ports;
 
-/// <summary>The written record of what agents left that nothing accounted for.</summary>
+/// <summary>The written record of what owners left that nothing accounted for.</summary>
 public interface IDiscoveries
 {
     /// <summary>Writes down what a census found new, or counts one more sighting of what was already written.</summary>

@@ -1,5 +1,5 @@
-using Snail.MCP.CleanUp.Core.Application;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Application;
+using Snail.Toolkit.Cleanup.Domain;
 using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
 namespace Snail.Toolkit.Cleanup.Tests;
@@ -10,7 +10,7 @@ public sealed class CleanerTests
 
     private readonly FakeKind _files = new(Kinds.File);
 
-    private Plan Planned(params Resource[] resources) => Planner.Decide(Inventory(resources), Scope.Mine, "plan");
+    private Plan Planned(params Resource[] resources) => Planner.Decide(Inventory(resources), Scope.Mine, "plan", Order);
 
     private readonly MemoryLedger _ledger = new();
 
@@ -50,9 +50,9 @@ public sealed class CleanerTests
     [Fact]
     public async Task Resource_OfAKindNothingHereReleases_IsRefusedWithTheReason()
     {
-        var release = Assert.Single(await Cleaner.ApplyAsync(Planned(Of(Kinds.Simulator, "udid", Me)), CancellationToken.None));
+        var release = Assert.Single(await Cleaner.ApplyAsync(Planned(Of(Simulator, "udid", Me)), CancellationToken.None));
 
         Assert.Equal(Outcome.Failed, release.Outcome);
-        Assert.Contains(Kinds.Simulator, release.Detail, StringComparison.Ordinal);
+        Assert.Contains(Simulator, release.Detail, StringComparison.Ordinal);
     }
 }

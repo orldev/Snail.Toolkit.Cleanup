@@ -1,21 +1,21 @@
-namespace Snail.MCP.CleanUp.Core.Application;
+namespace Snail.Toolkit.Cleanup.Application;
 
 /// <summary>Takes stock of the machine: asks every kind what it sees, settles whose each thing is, and notices what nothing knows.</summary>
 /// <remarks>
 /// The ledger outranks what a kind can tell by looking, because it remembers what looking can no longer
-/// show: a server started under an agent is a child of nothing once the agent has died, and only the line
-/// written while it was alive still says whose it was. That is also why a census writes down every resource
-/// it sees running under a live agent — the next census may be the first one after that agent is gone.
+/// show: a program started under an owner's process is a child of nothing once that process has ended, and only the
+/// line written while it was alive still says whose it was. That is also why a census writes down every resource it
+/// sees running under an owner still going — the next census may be the first one after that owner is gone.
 /// <para>
 /// Kinds only know what they were written for, so every census also follows the trails and compares them
-/// with what each running session began with. What is new, claimed by no kind and covered by no rule is a
+/// with what each owner still going began with. What is new, claimed by no kind and covered by no rule is a
 /// discovery: the account never assumes it already knows every kind of leftover there is.
 /// </para>
 /// </remarks>
 public sealed class Census(
     IEnumerable<IResourceKind> kinds,
     IEnumerable<ITrail> trails,
-    ISessions sessions,
+    IHolders holders,
     ILedger ledger,
     IRules rules,
     IBaselines baselines,
@@ -35,7 +35,7 @@ public sealed class Census(
         var began = clock.GetUtcNow();
         var started = clock.GetTimestamp();
         var timings = new System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan>(StringComparer.Ordinal);
-        var known = await sessions.ListAsync(cancellationToken);
+        var known = await holders.ListAsync(cancellationToken);
         var observations = await Task.WhenAll(kinds.Select(kind => TimedAsync($"kind:{kind.Name}", timings, () => ObservedAsync(kind, known, cancellationToken))));
         var holdings = await TimedAsync("ledger:holdings", timings, async () => (await ledger.HoldingsAsync(cancellationToken)).ToDictionary(holding => holding.ResourceId, StringComparer.Ordinal));
         var now = clock.GetUtcNow();
@@ -60,7 +60,16 @@ public sealed class Census(
 
         timings["census"] = clock.GetElapsedTime(started);
 
-        return new Inventory(now, asker, settled, known, kept, found, notes.ToDictionary()) { Timings = timings.ToDictionary(StringComparer.Ordinal) };
+        var inventory = new Inventory(now, settled, known)
+        {
+            Asker = asker,
+            Kept = kept,
+            Discoveries = found,
+            Notes = notes.ToDictionary(),
+            Timings = timings.ToDictionary(StringComparer.Ordinal)
+        };
+
+        return inventory;
     }
 
     /// <summary>Runs one look and adds how long it took to the time written down under its name.</summary>
@@ -81,7 +90,7 @@ public sealed class Census(
     }
 
     /// <summary>What a kind sees, or why it could not look: a kind that fails says so instead of failing the census.</summary>
-    private static async Task<Observation> ObservedAsync(IResourceKind kind, IReadOnlyList<Session> known, CancellationToken cancellationToken)
+    private static async Task<Observation> ObservedAsync(IResourceKind kind, IReadOnlyList<Holder> known, CancellationToken cancellationToken)
     {
         try
         {
@@ -137,7 +146,7 @@ public sealed class Census(
     private async Task<(IReadOnlyList<Discovery> Found, IEnumerable<KeyValuePair<string, string>> Notes)> NoticeAsync(
         IReadOnlyList<Observation> observations,
         IReadOnlyList<Resource> settled,
-        IReadOnlyList<Session> known,
+        IReadOnlyList<Holder> known,
         DateTimeOffset now,
         System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan> timings,
         CancellationToken cancellationToken)
@@ -154,7 +163,7 @@ public sealed class Census(
             ids[index] = traces[index].Id;
 
         var present = new HashSet<string>(ids, StringComparer.Ordinal);
-        var alive = known.Where(session => session.IsAlive).ToList();
+        var alive = known.Where(holder => holder.IsAlive).ToList();
 
         await TimedAsync("ledger:baselines", timings, async () =>
         {
@@ -174,7 +183,7 @@ public sealed class Census(
         });
         await TimedAsync("ledger:baselines", timings, async () =>
         {
-            await baselines.KeepOnlyAsync(alive.Select(session => session.Owner).ToHashSet(), cancellationToken);
+            await baselines.KeepOnlyAsync(alive.Select(holder => holder.Owner).ToHashSet(), cancellationToken);
 
             return true;
         });
@@ -262,35 +271,35 @@ public sealed class Census(
         .. settled.Where(resource => resource.Owner.IsKnown).Select(resource => resource.Id)
     ];
 
-    /// <summary>The first census a session takes part in is the line its «new» is measured from.</summary>
-    private async Task BeginAsync(IReadOnlyList<Session> alive, IReadOnlyList<string> seen, DateTimeOffset now, CancellationToken cancellationToken)
+    /// <summary>The first census an owner takes part in is the line its «new» is measured from.</summary>
+    private async Task BeginAsync(IReadOnlyList<Holder> alive, IReadOnlyList<string> seen, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        foreach (var session in alive)
-            await baselines.SaveAsync(session.Owner, seen, now, cancellationToken);
+        foreach (var holder in alive)
+            await baselines.SaveAsync(holder.Owner, seen, now, cancellationToken);
     }
 
     /// <summary>
-    /// What appeared since some running session began and nothing accounts for. A trace inside a session's
-    /// directory is that session's; otherwise it is the session's only when it was the one running, because
-    /// with two sessions running «it appeared» does not say whose it is.
+    /// What appeared since some owner still going began and nothing accounts for. A trace inside an owner's
+    /// directory is that owner's; otherwise it is the owner's only when it was the one going, because with two
+    /// owners going «it appeared» does not say whose it is.
     /// </summary>
     private async Task<IReadOnlyList<Discovery>> NewAsync(
         IReadOnlyList<Trace> traces,
         IReadOnlyList<string> ids,
         HashSet<string> claimed,
         IReadOnlyList<Rule> shown,
-        IReadOnlyList<Session> alive,
+        IReadOnlyList<Holder> alive,
         IReadOnlyList<Discovery> written,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         var noted = written.Select(discovery => discovery.Trace.Id).ToHashSet(StringComparer.Ordinal);
-        var began = new List<(Session Session, Baseline Seen)>();
+        var began = new List<(Holder Holder, Baseline Seen)>();
 
-        foreach (var session in alive)
+        foreach (var holder in alive)
         {
-            if (await baselines.FindAsync(session.Owner, cancellationToken) is { } seen)
-                began.Add((session, seen));
+            if (await baselines.FindAsync(holder.Owner, cancellationToken) is { } seen)
+                began.Add((holder, seen));
         }
 
         var fresh = new List<Discovery>();
@@ -302,12 +311,12 @@ public sealed class Census(
             if (claimed.Contains(id) || IsKnown(trace, shown))
                 continue;
 
-            List<Session>? during = null;
+            List<Holder>? during = null;
 
-            foreach (var (session, seen) in began)
+            foreach (var (holder, seen) in began)
             {
                 if (!seen.Contains(id))
-                    (during ??= []).Add(session);
+                    (during ??= []).Add(holder);
             }
 
             if (during is null)
@@ -346,9 +355,9 @@ public sealed class Census(
         }
     }
 
-    private static Owner OwnerOf(Trace trace, IReadOnlyList<Session> during)
+    private static Owner OwnerOf(Trace trace, IReadOnlyList<Holder> during)
     {
-        var inside = during.FirstOrDefault(session => session.Directory is { } directory && IsInside(trace.Key, directory));
+        var inside = during.FirstOrDefault(holder => holder.Directory is { } directory && IsInside(trace.Key, directory));
 
         if (inside is not null)
             return inside.Owner;

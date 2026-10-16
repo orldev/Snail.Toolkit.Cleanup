@@ -1,10 +1,12 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
-/// <summary>Who a resource belongs to: a session of an agent on this machine, a task of a platform, or nobody known.</summary>
+/// <summary>Who a resource belongs to: an owner of a kind the host names, with its id, or nobody known.</summary>
+/// <param name="Kind">What kind of owner it is, as the host names it: a session of an agent, a task, a project.</param>
+/// <param name="Id">The id the owner has among the owners of its kind.</param>
 /// <remarks>
-/// An owner is a kind and an id rather than a session id alone, because the same account is kept for two
-/// masters: a session of Claude Code on a developer's machine and a task of a platform running many agents.
-/// The kind keeps an id of one from ever being read as an id of the other.
+/// An owner is a kind and an id rather than an id alone, because one account can be kept for owners of several kinds
+/// at once — the sessions of agents, the tasks of a platform, its projects — and the kind keeps an id of one from ever
+/// being read as an id of another. The kinds are the host's: the library names none but <see cref="Nobody"/>.
 /// </remarks>
 public readonly record struct Owner(string Kind, string Id)
 {
@@ -13,12 +15,6 @@ public readonly record struct Owner(string Kind, string Id)
 
     /// <summary>Whether an owner is known at all.</summary>
     public bool IsKnown => !string.Equals(Kind, Nobody.Kind, StringComparison.Ordinal);
-
-    /// <summary>The session of an agent with this id.</summary>
-    public static Owner Session(string id) => new("session", id);
-
-    /// <summary>The task of a platform with this id.</summary>
-    public static Owner Task(string id) => new("task", id);
 
     /// <summary>The owner a text written by <see cref="ToString"/> names; nobody when it names none.</summary>
     public static Owner Parse(string? text)

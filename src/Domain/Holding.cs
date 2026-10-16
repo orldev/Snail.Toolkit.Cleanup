@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>What the ledger knows about one resource: who holds it, since when, and how that is known.</summary>
 /// <param name="ResourceId">The <see cref="Resource.Id"/> it is about.</param>

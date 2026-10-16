@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>How releasing one resource ended.</summary>
 public enum Outcome

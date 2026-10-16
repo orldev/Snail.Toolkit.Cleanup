@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Application.Ports;
+namespace Snail.Toolkit.Cleanup.Application.Ports;
 
 /// <summary>The rules the account knows: the ones it ships with and the ones it learned.</summary>
 public interface IRules

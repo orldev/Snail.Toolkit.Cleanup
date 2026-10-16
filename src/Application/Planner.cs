@@ -1,15 +1,19 @@
-namespace Snail.MCP.CleanUp.Core.Application;
+namespace Snail.Toolkit.Cleanup.Application;
 
 /// <summary>Decides what a cleanup does with every resource a census found, and in which order.</summary>
 /// <remarks>
-/// A pure function of the inventory and the scope, with no machine behind it, because this is the part that
-/// decides whether something is destroyed: it has to be provable by tests that build an inventory by hand,
-/// not by tests that need a simulator to exist.
+/// A pure function of the inventory, the scope and the order, with no machine behind it, because this is the part
+/// that decides whether something is destroyed: it has to be provable by tests that build an inventory by hand, not by
+/// tests that need the real resources to exist.
 /// </remarks>
 public static class Planner
 {
-    /// <summary>The plan for one scope of one inventory.</summary>
-    public static Plan Decide(Inventory inventory, Scope scope, string id)
+    /// <summary>The plan for one scope of one inventory, its removals in the order of the host's kinds.</summary>
+    /// <remarks>
+    /// The order is asked for rather than assumed: a host whose own kinds were left out of it would see them taken apart
+    /// last, after the processes that may still be using them.
+    /// </remarks>
+    public static Plan Decide(Inventory inventory, Scope scope, string id, KindOrder order)
     {
         var alive = inventory.Alive;
         var decisions = new List<Decision>(inventory.Resources.Count);
@@ -20,7 +24,7 @@ public static class Planner
                 decisions.Add(decision);
         }
 
-        return new Plan(id, inventory.Asker, scope, inventory.TakenAt, Ordering.Of(decisions), Discovered(inventory, alive, scope));
+        return new Plan(id, inventory.Asker, scope, inventory.TakenAt, Ordering.Of(decisions, order), Discovered(inventory, alive, scope));
     }
 
     private static Decision? Judge(Resource resource, Inventory inventory, IReadOnlySet<Owner> alive, Scope scope)
@@ -36,7 +40,7 @@ public static class Planner
         return standing switch
         {
             Standing.HeldByAnother => new Decision(resource, Verdict.Keep, $"held by {resource.Owner}, which is still running"),
-            Standing.Unowned => new Decision(resource, Verdict.Report, "nothing ties it to an agent"),
+            Standing.Unowned => new Decision(resource, Verdict.Report, "nothing ties it to an owner"),
             _ when resource.Blocker is { } blocker => new Decision(resource, Verdict.Report, blocker),
             Standing.Shared => Shared(resource),
             _ => Owned(resource, standing)
@@ -54,12 +58,12 @@ public static class Planner
 
         return resource.Evidence switch
         {
-            Evidence.Ledger => new Decision(resource, Verdict.Remove, $"made through this server for {whose}"),
+            Evidence.Ledger => new Decision(resource, Verdict.Remove, $"recorded at birth for {whose}"),
             Evidence.Label => new Decision(resource, Verdict.Remove, $"its name carries {whose}"),
-            Evidence.Environment => new Decision(resource, Verdict.Remove, $"its environment carries {whose}: the agent started it"),
-            Evidence.Ancestry => new Decision(resource, Verdict.Remove, $"seen running under the agent of {whose}"),
-            Evidence.Appeared => new Decision(resource, Verdict.Report, $"appeared while {whose} was running, which is not proof it is the agent's"),
-            _ => new Decision(resource, Verdict.Report, "nothing ties it to an agent")
+            Evidence.Environment => new Decision(resource, Verdict.Remove, $"its environment carries {whose}: it was started for it"),
+            Evidence.Ancestry => new Decision(resource, Verdict.Remove, $"seen running under the process of {whose}"),
+            Evidence.Appeared => new Decision(resource, Verdict.Report, $"appeared while {whose} was running, which is not proof that it made it"),
+            _ => new Decision(resource, Verdict.Report, "nothing ties it to an owner")
         };
     }
 
@@ -93,7 +97,7 @@ public static class Planner
         _ => inventory.Discoveries
     };
 
-    /// <summary>Where a resource stands relative to the session asking.</summary>
+    /// <summary>Where a resource stands relative to the owner asking.</summary>
     private enum Standing
     {
         Mine,

@@ -1,9 +1,9 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>What ties a resource to its owner, weakest first.</summary>
 /// <remarks>
-/// Only the last four are proof. A resource that merely appeared while a session ran may as well be the
-/// developer's own, which is why nothing below <see cref="Ancestry"/> is ever removed on ownership alone.
+/// Only the last four are proof. A resource that merely appeared while an owner was going may as well be
+/// somebody else's, which is why nothing below <see cref="Ancestry"/> is ever removed on ownership alone.
 /// <para>
 /// The order is the strength, and only that: a store keeps each value under a code of its own, so that a value added
 /// between two others does not change what the rows written before it say.
@@ -11,27 +11,27 @@ namespace Snail.MCP.CleanUp.Core.Domain;
 /// </remarks>
 public enum Evidence
 {
-    /// <summary>Nothing ties it to an agent.</summary>
+    /// <summary>Nothing ties it to an owner.</summary>
     None,
 
-    /// <summary>It appeared while a session ran: a coincidence of time, not of cause.</summary>
+    /// <summary>It appeared while an owner was going: a coincidence of time, not of cause.</summary>
     Appeared,
 
-    /// <summary>It was seen running under the agent's own process while the session was alive.</summary>
+    /// <summary>It was seen running under the owner's own process while the owner was alive.</summary>
     Ancestry,
 
-    /// <summary>Its environment carries the session: Claude Code gives every program it starts <c>CLAUDE_CODE_SESSION_ID</c>, and a program keeps it when it detaches.</summary>
+    /// <summary>Its environment carries the owner: it was started with the owner's id in a variable of its environment, which a program keeps when it detaches.</summary>
     /// <remarks>
-    /// Written by the agent when the program was made, like a label, but read from the program rather than given to it on
-    /// purpose — and only from the programs of the user this server runs as, since another user's environment says nothing
-    /// this server may act on.
+    /// Written by whoever started the program, like a label, but read from the program rather than given to it on
+    /// purpose — and only from the programs of the user the host runs as, since another user's environment says nothing
+    /// the host may act on.
     /// </remarks>
     Environment,
 
     /// <summary>Its own name or label carries the owner, written there when it was made.</summary>
     Label,
 
-    /// <summary>It was made through this server and recorded at birth.</summary>
+    /// <summary>It was made through the host and recorded at birth.</summary>
     Ledger
 }
 

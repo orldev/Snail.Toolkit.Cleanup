@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Time.Testing;
-using Snail.MCP.CleanUp.Core.Adapters;
-using Snail.MCP.CleanUp.Core.Application;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Adapters;
+using Snail.Toolkit.Cleanup.Application;
+using Snail.Toolkit.Cleanup.Application.Ports;
+using Snail.Toolkit.Cleanup.Domain;
 using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
 namespace Snail.Toolkit.Cleanup.Tests;
@@ -24,7 +25,7 @@ public sealed class CensusTests : IDisposable
         new(
             kinds.Length > 0 ? kinds : [_processes],
             [],
-            new FakeSessions(Me, Alive(Me), Dead(Gone)),
+            new FakeHolders(Me, Alive(Me), Dead(Gone)),
             Ledger,
             new JsonRules(_scratch.File("rules.json"), []),
             _baselines,
@@ -92,8 +93,48 @@ public sealed class CensusTests : IDisposable
     }
 
     [Fact]
-    public async Task Inventory_KnowsWhichSessionsAreAlive() =>
+    public async Task Inventory_KnowsWhichOwnersAreAlive() =>
         Assert.Equal([Me], (await Census().TakeAsync(Me, CancellationToken.None)).Alive);
 
+    /// <summary>A host carries what only its own owners have on a record of its own, and its kinds get that record back.</summary>
+    [Fact]
+    public async Task HoldersOfTheHostsOwnShape_ReachItsKinds_AsTheHostMadeThem()
+    {
+        var watching = new WatchingKind();
+        var census = new Census(
+            [watching],
+            [],
+            new FakeHolders(Me, new AgentSession(Me, 4242)),
+            Ledger,
+            new JsonRules(_scratch.File("rules.json"), []),
+            _baselines,
+            _discoveries,
+            new FakeTimeProvider(DateTimeOffset.UnixEpoch));
+
+        await census.TakeAsync(Me, CancellationToken.None);
+
+        Assert.Equal(4242, Assert.IsType<AgentSession>(Assert.Single(watching.Given)).Pid);
+    }
+
     public void Dispose() => _scratch.Dispose();
+
+    /// <summary>What a host of agents knows of its sessions beyond what the library asks: the process of the agent.</summary>
+    private sealed record AgentSession(Owner Owner, int Pid) : Holder(Owner, IsAlive: true);
+
+    /// <summary>A kind that remembers the holders it was given.</summary>
+    private sealed class WatchingKind : IResourceKind
+    {
+        public IReadOnlyList<Holder> Given { get; private set; } = [];
+
+        public string Name => Kinds.Process;
+
+        public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken)
+        {
+            Given = holders;
+
+            return Task.FromResult(new Observation(Name, [], []));
+        }
+
+        public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
+    }
 }

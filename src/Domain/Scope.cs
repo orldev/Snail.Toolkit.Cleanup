@@ -1,12 +1,12 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>Which resources a plan is about.</summary>
 public enum Scope
 {
-    /// <summary>What the asking session holds.</summary>
+    /// <summary>What the asking owner holds.</summary>
     Mine,
 
-    /// <summary>What sessions that are no longer running left behind.</summary>
+    /// <summary>What owners that are over left behind.</summary>
     Orphans,
 
     /// <summary>Shared caches that rebuild themselves; never part of anything else.</summary>

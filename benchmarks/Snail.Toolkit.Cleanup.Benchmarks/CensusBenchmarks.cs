@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
-using Snail.MCP.CleanUp.Core.Application;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Application;
+using Snail.Toolkit.Cleanup.Domain;
 
 namespace Snail.Toolkit.Cleanup.Benchmarks;
 
@@ -8,7 +8,7 @@ namespace Snail.Toolkit.Cleanup.Benchmarks;
 /// <remarks>
 /// A busy Mac's file trail was 32 000 entries on 2026-10-13; a kind follows it to look, and the census reads it from that
 /// observation. Beside it a trail of 2 000 processes the census walks itself, 5 000 resources of which half are written in
-/// the ledger, sixteen rules, and two running sessions: one whose baseline lacks the newest thousand entries, which are
+/// the ledger, sixteen rules, and two owners going: one whose baseline lacks the newest thousand entries, which are
 /// therefore discoveries seen again at every census, and one that took its baseline with everything there.
 /// </remarks>
 [MemoryDiagnoser]
@@ -22,9 +22,9 @@ public class CensusBenchmarks
 
     private const int Resources = 5_000;
 
-    private static readonly Session Began = new("bench-began", 1, null, "/work/began", IsAlive: true);
+    private static readonly Holder Began = new(new Owner("session", "bench-began"), IsAlive: true) { Directory = "/work/began" };
 
-    private static readonly Session Settled = new("bench-settled", 2, null, "/work/settled", IsAlive: true);
+    private static readonly Holder Settled = new(new Owner("session", "bench-settled"), IsAlive: true) { Directory = "/work/settled" };
 
     private Census _census = null!;
 
@@ -54,7 +54,7 @@ public class CensusBenchmarks
         _census = new Census(
             [new WalkingKind("file", resources, files)],
             [new StillTrail("file", files), new StillTrail("process", processes)],
-            new StillSessions(Began, Settled),
+            new StillHolders(Began, Settled),
             ledger,
             new StillRules(_rules),
             baselines,

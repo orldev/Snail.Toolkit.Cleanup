@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>What a trail showed when a kind followed it to look.</summary>
 /// <param name="Trail">The name of the trail, such as <c>file</c>.</param>

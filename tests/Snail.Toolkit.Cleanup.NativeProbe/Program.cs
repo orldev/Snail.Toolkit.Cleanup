@@ -1,9 +1,9 @@
-using Snail.MCP.CleanUp.Core.Adapters;
-using Snail.MCP.CleanUp.Core.Application;
-using Snail.MCP.CleanUp.Core.Domain;
+using Snail.Toolkit.Cleanup.Adapters;
+using Snail.Toolkit.Cleanup.Application;
+using Snail.Toolkit.Cleanup.Domain;
 
-var asker = Owner.Session("probe");
-var ended = Owner.Task("ended");
+var asker = new Owner("session", "probe");
+var ended = new Owner("task", "ended");
 
 Resource[] resources =
 [
@@ -11,16 +11,9 @@ Resource[] resources =
     new() { Kind = Kinds.Process, Key = "7@1", Title = "server", Owner = ended, Evidence = Evidence.Ledger }
 ];
 
-var inventory = new Inventory(
-    DateTimeOffset.UnixEpoch,
-    asker,
-    resources,
-    [new Session(ended.Id, null, null, null, IsAlive: false) { OwnerKind = ended.Kind }],
-    new Dictionary<string, string>(),
-    [],
-    new Dictionary<string, string>());
+var inventory = new Inventory(DateTimeOffset.UnixEpoch, resources, [new Holder(ended, IsAlive: false)]) { Asker = asker };
 
-var plan = Planner.Decide(inventory, Scope.Orphans, "probe");
+var plan = Planner.Decide(inventory, Scope.Orphans, "probe", KindOrder.General);
 var order = string.Join(',', plan.Removals.Select(removal => removal.Resource.Id));
 
 using var process = System.Diagnostics.Process.GetCurrentProcess();

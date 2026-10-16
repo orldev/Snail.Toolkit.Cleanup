@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Snail.MCP.CleanUp.Core.Adapters;
+namespace Snail.Toolkit.Cleanup.Adapters;
 
 /// <summary>Rules as a JSON file a person can read and edit, laid over the rules the account ships with.</summary>
 /// <remarks>

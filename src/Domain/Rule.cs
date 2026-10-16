@@ -1,4 +1,4 @@
-namespace Snail.MCP.CleanUp.Core.Domain;
+namespace Snail.Toolkit.Cleanup.Domain;
 
 /// <summary>What a rule says to do with the traces it matches.</summary>
 public enum RuleAction
@@ -19,8 +19,8 @@ public enum RuleAction
 /// <param name="Action">What is done with what it matches.</param>
 /// <remarks>
 /// Rules are how the account learns a kind nobody wrote code for. A discovery shows something new; one
-/// line in <c>rules.json</c> turns every later trace like it into something known — without a release of
-/// this server, and without the next agent having to rediscover it.
+/// line in the rules file turns every later trace like it into something known — without a release of
+/// the host, and without anyone having to rediscover it.
 /// </remarks>
 public sealed record Rule(string Trail, string Pattern, RuleAction Action)
 {
