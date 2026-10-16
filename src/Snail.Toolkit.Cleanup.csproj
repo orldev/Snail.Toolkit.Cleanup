@@ -1,0 +1,16 @@
+<Project Sdk="Snail.Sdk.Library">
+
+  <PropertyGroup>
+    <RootNamespace>Snail.MCP.CleanUp.Core</RootNamespace>
+    <PackageId>Snail.Toolkit.Cleanup</PackageId>
+    <Description>The part of cleaning up what agents and tasks leave behind that does not depend on where it runs: who owns what and how that is known, what a cleanup may remove, and in which order. No dependencies; the places resources live in are the host's.</Description>
+    <PackageTags>snail;cleanup;ownership;leftovers;agents</PackageTags>
+    <RepositoryUrl>https://github.com/orldev/Snail.Toolkit.Cleanup</RepositoryUrl>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="/" Visible="false" />
+  </ItemGroup>
+
+</Project>

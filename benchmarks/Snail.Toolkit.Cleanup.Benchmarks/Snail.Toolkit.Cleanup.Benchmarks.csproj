@@ -1,0 +1,11 @@
+<Project Sdk="Snail.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Snail.Toolkit.Cleanup.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,24 @@
+# What git is not to look at, and nothing else. Add a line when something new appears on disk, not in advance.
+
+# Build output.
+artifacts/
+[Bb]in/
+[Oo]bj/
+[Tt]est[Rr]esults/
+*.binlog
+
+# Editors and their per-user state.
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+*.DotSettings.user
+_ReSharper*/
+
+# Whatever the operating system leaves behind.
+.DS_Store
+Thumbs.db
+
+# BenchmarkDotNet results; the summaries worth keeping go into commits and notes.
+BenchmarkDotNet.Artifacts/

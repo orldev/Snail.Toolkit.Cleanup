@@ -1,7 +1,7 @@
 using Snail.MCP.CleanUp.Core.Adapters;
 using Snail.MCP.CleanUp.Core.Domain;
 
-namespace Snail.MCP.CleanUp.Tests.Core;
+namespace Snail.Toolkit.Cleanup.Tests;
 
 public sealed class JsonRulesTests : IDisposable
 {

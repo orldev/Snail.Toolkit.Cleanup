@@ -1,23 +1,24 @@
 using Microsoft.Extensions.Time.Testing;
-using Snail.MCP.CleanUp.Adapters.Ledger;
 using Snail.MCP.CleanUp.Core.Adapters;
 using Snail.MCP.CleanUp.Core.Application;
 using Snail.MCP.CleanUp.Core.Domain;
-using static Snail.MCP.CleanUp.Tests.Support.Things;
+using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
-namespace Snail.MCP.CleanUp.Tests.Core;
+namespace Snail.Toolkit.Cleanup.Tests;
 
 public sealed class CensusTests : IDisposable
 {
     private readonly Scratch _scratch = new();
 
-    private readonly LedgerFile _file;
-
     private readonly FakeKind _processes = new(Kinds.Process);
 
-    public CensusTests() => _file = new LedgerFile(_scratch.File("ledger.db"));
+    private readonly MemoryLedger _ledger = new();
 
-    private SqliteLedger Ledger => new(_file);
+    private readonly MemoryBaselines _baselines = new();
+
+    private readonly MemoryDiscoveries _discoveries = new();
+
+    private MemoryLedger Ledger => _ledger;
 
     private Census Census(params FakeKind[] kinds) =>
         new(
@@ -26,8 +27,8 @@ public sealed class CensusTests : IDisposable
             new FakeSessions(Me, Alive(Me), Dead(Gone)),
             Ledger,
             new JsonRules(_scratch.File("rules.json"), []),
-            new SqliteBaselines(_file),
-            new SqliteDiscoveries(_file),
+            _baselines,
+            _discoveries,
             new FakeTimeProvider(DateTimeOffset.UnixEpoch));
 
     /// <summary>Once the agent has died, its server is a child of nothing; only the ledger still says whose it was.</summary>
@@ -94,9 +95,5 @@ public sealed class CensusTests : IDisposable
     public async Task Inventory_KnowsWhichSessionsAreAlive() =>
         Assert.Equal([Me], (await Census().TakeAsync(Me, CancellationToken.None)).Alive);
 
-    public void Dispose()
-    {
-        _file.Dispose();
-        _scratch.Dispose();
-    }
+    public void Dispose() => _scratch.Dispose();
 }

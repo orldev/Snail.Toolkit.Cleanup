@@ -1,0 +1,13 @@
+name: build and tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: orldev/Snail.Sdk/.github/workflows/lib-ci.yml@v1

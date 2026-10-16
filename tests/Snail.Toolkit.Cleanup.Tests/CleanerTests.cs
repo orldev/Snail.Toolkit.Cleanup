@@ -1,32 +1,27 @@
-using Snail.MCP.CleanUp.Adapters.Ledger;
 using Snail.MCP.CleanUp.Core.Application;
 using Snail.MCP.CleanUp.Core.Domain;
-using static Snail.MCP.CleanUp.Tests.Support.Things;
+using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
-namespace Snail.MCP.CleanUp.Tests.Core;
+namespace Snail.Toolkit.Cleanup.Tests;
 
-public sealed class CleanerTests : IDisposable
+public sealed class CleanerTests
 {
-    private readonly Scratch _scratch = new();
-
-    private readonly LedgerFile _file;
-
     private readonly FakeKind _processes = new(Kinds.Process);
 
     private readonly FakeKind _files = new(Kinds.File);
 
-    public CleanerTests() => _file = new LedgerFile(_scratch.File("ledger.db"));
-
     private Plan Planned(params Resource[] resources) => Planner.Decide(Inventory(resources), Scope.Mine, "plan");
 
-    private Cleaner Cleaner => new([_processes, _files], new SqliteLedger(_file));
+    private readonly MemoryLedger _ledger = new();
+
+    private Cleaner Cleaner => new([_processes, _files], _ledger);
 
     [Fact]
     public async Task Removals_AreCarriedOutInThePlansOrder_AndCrossedOffTheLedger()
     {
         var process = Of(Kinds.Process, "7@1", Me);
         var file = Of(Kinds.File, "/scratch", Me);
-        var ledger = new SqliteLedger(_file);
+        var ledger = _ledger;
 
         await ledger.RecordAsync(new Holding(process.Id, Me, Evidence.Ledger, DateTimeOffset.UnixEpoch, "p"), CancellationToken.None);
 
@@ -59,11 +54,5 @@ public sealed class CleanerTests : IDisposable
 
         Assert.Equal(Outcome.Failed, release.Outcome);
         Assert.Contains(Kinds.Simulator, release.Detail, StringComparison.Ordinal);
-    }
-
-    public void Dispose()
-    {
-        _file.Dispose();
-        _scratch.Dispose();
     }
 }

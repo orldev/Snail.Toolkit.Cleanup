@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Time.Testing;
-using Snail.MCP.CleanUp.Adapters.Ledger;
 using Snail.MCP.CleanUp.Core.Adapters;
 using Snail.MCP.CleanUp.Core.Application;
+using Snail.MCP.CleanUp.Core.Application.Ports;
 using Snail.MCP.CleanUp.Core.Domain;
-using static Snail.MCP.CleanUp.Tests.Support.Things;
+using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
-namespace Snail.MCP.CleanUp.Tests.Core;
+namespace Snail.Toolkit.Cleanup.Tests;
 
 /// <summary>
 /// The account never assumes it knows every kind of leftover there is. What appears during a session and
@@ -15,8 +15,6 @@ public sealed class DiscoveryTests : IDisposable
 {
     private readonly Scratch _scratch = new();
 
-    private readonly LedgerFile _file;
-
     private readonly FakeTrail _files = new("file");
 
     private readonly FakeKind _known = new(Kinds.File);
@@ -25,20 +23,24 @@ public sealed class DiscoveryTests : IDisposable
 
     private Session[] _sessions = [new(Me.Id, 1, DateTimeOffset.UnixEpoch, "/work/me", IsAlive: true)];
 
-    public DiscoveryTests() => _file = new LedgerFile(_scratch.File("ledger.db"));
+    private readonly MemoryLedger _ledger = new();
+
+    private readonly MemoryBaselines _baselines = new();
+
+    private readonly MemoryDiscoveries _discoveries = new();
 
     private JsonRules Rules => new(_scratch.File("rules.json"), [new Rule("file", "~/.claude/**", RuleAction.Ignore)]);
 
     private Census Census => CensusOf(_known);
 
-    private Census CensusOf(Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind kind) => new(
+    private Census CensusOf(IResourceKind kind) => new(
         [kind],
         [_files],
         new FakeSessions(Me, _sessions),
-        new SqliteLedger(_file),
+        _ledger,
         Rules,
-        new SqliteBaselines(_file),
-        new SqliteDiscoveries(_file),
+        _baselines,
+        _discoveries,
         _clock);
 
     private Task<Inventory> TakenAsync() => Census.TakeAsync(Me, CancellationToken.None);
@@ -121,7 +123,7 @@ public sealed class DiscoveryTests : IDisposable
 
         _clock.Advance(TimeSpan.FromMinutes(2));
         Assert.Empty((await TakenAsync()).Discoveries);
-        Assert.Equal(0, await RowsAsync());
+        Assert.Equal(0, _discoveries.Count);
     }
 
     /// <summary>
@@ -140,7 +142,7 @@ public sealed class DiscoveryTests : IDisposable
 
         _clock.Advance(Discovery.Remembered + TimeSpan.FromDays(1));
         var discovery = Assert.Single((await TakenAsync()).Discoveries);
-        var written = Assert.Single(await new SqliteDiscoveries(_file).ListAsync(new HashSet<string>(), _clock.GetUtcNow(), CancellationToken.None));
+        var written = Assert.Single(await _discoveries.ListAsync(new HashSet<string>(), _clock.GetUtcNow(), CancellationToken.None));
 
         Assert.True(discovery.IsPresent);
         Assert.Equal(_clock.GetUtcNow(), discovery.LastSeen);
@@ -161,7 +163,7 @@ public sealed class DiscoveryTests : IDisposable
 
         var taken = (await TakenAsync()).Discoveries;
         var present = _files.Present.Select(trace => trace.Id).ToHashSet(StringComparer.Ordinal);
-        var read = await new SqliteDiscoveries(_file).ListAsync(present, _clock.GetUtcNow(), CancellationToken.None);
+        var read = await _discoveries.ListAsync(present, _clock.GetUtcNow(), CancellationToken.None);
 
         Assert.Equal(["file:/tmp/second", "file:/tmp/first"], taken.Select(discovery => discovery.Trace.Id));
         Assert.Equal(read, taken);
@@ -180,10 +182,10 @@ public sealed class DiscoveryTests : IDisposable
             [new ClaimingKind(trace.Id)],
             [_files],
             new FakeSessions(Me, _sessions),
-            new SqliteLedger(_file),
+            _ledger,
             Rules,
-            new SqliteBaselines(_file),
-            new SqliteDiscoveries(_file),
+            _baselines,
+            _discoveries,
             _clock);
 
         Assert.Empty((await census.TakeAsync(Me, CancellationToken.None)).Discoveries);
@@ -235,7 +237,7 @@ public sealed class DiscoveryTests : IDisposable
         var rule = new Rule("file", "/Users/dev/Library/Application Support/Code/WebStorage/*", RuleAction.Cache) { BlockedWhileRunning = "Code" };
 
         await Rules.AddAsync(rule, CancellationToken.None);
-        var settled = await new SqliteDiscoveries(_file).SettleAsync(rule, CancellationToken.None);
+        var settled = await _discoveries.SettleAsync(rule, CancellationToken.None);
 
         Assert.Equal(1, settled);
         Assert.Empty((await TakenAsync()).Discoveries);
@@ -269,24 +271,10 @@ public sealed class DiscoveryTests : IDisposable
         Assert.Empty(plan.Removals);
     }
 
-    private async Task<long> RowsAsync()
-    {
-        await using var connection = await _file.OpenAsync(CancellationToken.None);
-        await using var count = connection.CreateCommand();
-
-        count.CommandText = "SELECT COUNT(*) FROM discoveries;";
-
-        return (long)(await count.ExecuteScalarAsync(CancellationToken.None))!;
-    }
-
-    public void Dispose()
-    {
-        _file.Dispose();
-        _scratch.Dispose();
-    }
+    public void Dispose() => _scratch.Dispose();
 
     /// <summary>A kind that looks by following a trail, the way the file kind follows the file trail.</summary>
-    private sealed class WalkingKind(FakeTrail trail) : Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind
+    private sealed class WalkingKind(FakeTrail trail) : IResourceKind
     {
         public string Name => Kinds.File;
 
@@ -297,7 +285,7 @@ public sealed class DiscoveryTests : IDisposable
             Task.FromResult(Release.AlreadyGone(resource));
     }
 
-    private sealed class ClaimingKind(string claimed) : Snail.MCP.CleanUp.Core.Application.Ports.IResourceKind
+    private sealed class ClaimingKind(string claimed) : IResourceKind
     {
         public string Name => Kinds.File;
 

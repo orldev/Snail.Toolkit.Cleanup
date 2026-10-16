@@ -1,8 +1,8 @@
 using Snail.MCP.CleanUp.Core.Application;
 using Snail.MCP.CleanUp.Core.Domain;
-using static Snail.MCP.CleanUp.Tests.Support.Things;
+using static Snail.Toolkit.Cleanup.Tests.Support.Things;
 
-namespace Snail.MCP.CleanUp.Tests.Core;
+namespace Snail.Toolkit.Cleanup.Tests;
 
 public sealed class OrderingTests
 {
