@@ -1,10 +1,14 @@
 #nullable enable
+const Snail.Toolkit.Cleanup.Adapters.NamedEntries.CountedAtMost = 100000 -> int
 const Snail.Toolkit.Cleanup.Domain.Kinds.Container = "container" -> string!
 const Snail.Toolkit.Cleanup.Domain.Kinds.File = "file" -> string!
 const Snail.Toolkit.Cleanup.Domain.Kinds.Image = "image" -> string!
 const Snail.Toolkit.Cleanup.Domain.Kinds.Network = "network" -> string!
 const Snail.Toolkit.Cleanup.Domain.Kinds.Process = "process" -> string!
 const Snail.Toolkit.Cleanup.Domain.Kinds.Volume = "volume" -> string!
+override Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Equals(object? obj) -> bool
+override Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.GetHashCode() -> int
+override Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.ToString() -> string!
 override Snail.Toolkit.Cleanup.Domain.Decision.Equals(object? obj) -> bool
 override Snail.Toolkit.Cleanup.Domain.Decision.GetHashCode() -> int
 override Snail.Toolkit.Cleanup.Domain.Decision.ToString() -> string!
@@ -43,10 +47,40 @@ override Snail.Toolkit.Cleanup.Domain.Trace.ToString() -> string!
 override Snail.Toolkit.Cleanup.Domain.Walk.Equals(object? obj) -> bool
 override Snail.Toolkit.Cleanup.Domain.Walk.GetHashCode() -> int
 override Snail.Toolkit.Cleanup.Domain.Walk.ToString() -> string!
+Snail.Toolkit.Cleanup.Adapters.EntryType
+Snail.Toolkit.Cleanup.Adapters.EntryType.Directories = 0 -> Snail.Toolkit.Cleanup.Adapters.EntryType
+Snail.Toolkit.Cleanup.Adapters.EntryType.Files = 1 -> Snail.Toolkit.Cleanup.Adapters.EntryType
 Snail.Toolkit.Cleanup.Adapters.JsonRules
 Snail.Toolkit.Cleanup.Adapters.JsonRules.AddAsync(Snail.Toolkit.Cleanup.Domain.Rule! rule, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 Snail.Toolkit.Cleanup.Adapters.JsonRules.JsonRules(string! path, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>! shipped) -> void
 Snail.Toolkit.Cleanup.Adapters.JsonRules.ListAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Rule!>!>!
+Snail.Toolkit.Cleanup.Adapters.NamedEntries
+Snail.Toolkit.Cleanup.Adapters.NamedEntries.Name.get -> string!
+Snail.Toolkit.Cleanup.Adapters.NamedEntries.NamedEntries(Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions! options, System.TimeProvider! clock) -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntries.ObserveAsync(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Holder!>! holders, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Observation!>!
+Snail.Toolkit.Cleanup.Adapters.NamedEntries.ReleaseAsync(Snail.Toolkit.Cleanup.Domain.Resource! resource, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Release!>!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.<Clone>$() -> Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Entries.get -> Snail.Toolkit.Cleanup.Adapters.EntryType
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Entries.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Equals(Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions? other) -> bool
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Grace.get -> System.TimeSpan
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Grace.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.IsRegenerable.get -> bool
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.IsRegenerable.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Kind.get -> string!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Kind.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.NamedEntriesOptions() -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.OwnerIn.get -> System.Func<string!, string?>!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.OwnerIn.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.OwnerKind.get -> string!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.OwnerKind.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Pattern.get -> string!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Pattern.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.ReleaseDetail.get -> System.Func<Snail.Toolkit.Cleanup.Domain.Resource!, string!>?
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.ReleaseDetail.init -> void
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Root.get -> string!
+Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.Root.init -> void
 Snail.Toolkit.Cleanup.Application.Census
 Snail.Toolkit.Cleanup.Application.Census.Census(System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.IResourceKind!>! kinds, System.Collections.Generic.IEnumerable<Snail.Toolkit.Cleanup.Application.Ports.ITrail!>! trails, Snail.Toolkit.Cleanup.Application.Ports.IHolders! holders, Snail.Toolkit.Cleanup.Application.Ports.ILedger! ledger, Snail.Toolkit.Cleanup.Application.Ports.IRules! rules, Snail.Toolkit.Cleanup.Application.Ports.IBaselines! baselines, Snail.Toolkit.Cleanup.Application.Ports.IDiscoveries! discoveries, System.TimeProvider! clock) -> void
 Snail.Toolkit.Cleanup.Application.Census.TakeAsync(Snail.Toolkit.Cleanup.Domain.Owner asker, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Snail.Toolkit.Cleanup.Domain.Inventory!>!
@@ -345,6 +379,8 @@ Snail.Toolkit.Cleanup.Domain.Walk.Traces.init -> void
 Snail.Toolkit.Cleanup.Domain.Walk.Trail.get -> string!
 Snail.Toolkit.Cleanup.Domain.Walk.Trail.init -> void
 Snail.Toolkit.Cleanup.Domain.Walk.Walk(string! Trail, System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Trace!>! Traces) -> void
+static Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.operator !=(Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions? left, Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions? right) -> bool
+static Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions.operator ==(Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions? left, Snail.Toolkit.Cleanup.Adapters.NamedEntriesOptions? right) -> bool
 static Snail.Toolkit.Cleanup.Application.Census.Settling.get -> System.TimeSpan
 static Snail.Toolkit.Cleanup.Application.Ordering.Of(System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>! decisions, Snail.Toolkit.Cleanup.Domain.KindOrder! order) -> System.Collections.Generic.IReadOnlyList<Snail.Toolkit.Cleanup.Domain.Decision!>!
 static Snail.Toolkit.Cleanup.Application.Planner.Decide(Snail.Toolkit.Cleanup.Domain.Inventory! inventory, Snail.Toolkit.Cleanup.Domain.Scope scope, string! id, Snail.Toolkit.Cleanup.Domain.KindOrder! order) -> Snail.Toolkit.Cleanup.Domain.Plan!

@@ -41,6 +41,53 @@ var order = KindOrder.General
     .Before(Kinds.File, "worktree", "editor", "testresults", "remains", "outside");
 ```
 
+## Entries named for their owner
+
+`NamedEntries` is a ready-made kind for entries under a root whose name carries their owner — the folder of a task
+named for the task, the key of a project named for the project. The name is the proof; an entry goes once its owner
+is over or erased, but not within a grace after it was last written or after its owner ended, and never when it
+changed since it was observed. Links are never followed out of the root. A platform worker covers its folders and its
+keys with two instances:
+
+```csharp
+static string? GuidIn(string name) => Guid.TryParseExact(name, "N", out var id) ? id.ToString("n") : null;
+
+static string? KeyOwnerIn(string name)
+{
+    var dot = name.IndexOf('.', StringComparison.Ordinal);
+
+    return dot > 0 && name.AsSpan(dot).StartsWith(".key", StringComparison.Ordinal) ? GuidIn(name[..dot]) : null;
+}
+
+IResourceKind[] kinds =
+[
+    new NamedEntries(new NamedEntriesOptions
+    {
+        Kind = "workspace", Root = root, OwnerKind = "task", OwnerIn = GuidIn, Grace = grace, IsRegenerable = true
+    }, clock),
+    new NamedEntries(new NamedEntriesOptions
+    {
+        Kind = "project-key", Root = Path.Combine(root, ".credentials"), OwnerKind = "project",
+        OwnerIn = KeyOwnerIn, Entries = EntryType.Files, Pattern = "*.key*", Grace = grace
+    }, clock)
+];
+```
+
+A key is named for its project up to the first dot, and `.key` follows that dot: `<id>.key` and the half-written
+`<id>.key.<guid>` a crash leaves beside it are the project's, while `<id>.old.key`, `<id>.pub` and `deploy.key` carry
+no owner and are never touched — the pattern only narrows the listing, the owner is read by `OwnerIn`.
+
+A task's holder says when it ended (`EndedAt`), and the grace is counted from there; a task erased from the host's
+records has no holder, and its folder goes once it has not been written for the grace.
+
+Only what can go is measured. The folder of a task still going is kept whatever its size, so it is never walked and
+its `Bytes` stays unknown; the folders of tasks that ended or were erased are counted file by file, «at least» when the
+count stopped short (`NamedEntries.CountedAtMost` files, or a directory it may not read). A file's length comes with
+the listing and is always given.
+
+A release says `deleted from <root>`. A host that knows why its entries may go says so in its own words instead, given
+the entry as it was released: `ReleaseDetail = _ => "erased: the task's branch carries its work"`.
+
 ## What holds, whatever the host
 
 

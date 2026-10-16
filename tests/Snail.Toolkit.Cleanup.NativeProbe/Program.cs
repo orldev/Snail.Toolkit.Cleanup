@@ -31,9 +31,19 @@ try
     var learned = await rules.ListAsync(CancellationToken.None);
     var isRead = learned is [{ Action: RuleAction.Cache, Note: "native" }] && learned[0].Matches(new Trace("file", "/tmp/probe/x", "x"));
 
-    Console.WriteLine($"plan: {order}; rule read back: {isRead}");
+    var task = Guid.NewGuid().ToString("n");
 
-    return string.Equals(order, "process:7@1,file:/scratch", StringComparison.Ordinal) && isRead ? 0 : 1;
+    Directory.CreateDirectory(Path.Combine(folder, task));
+
+    var entries = new NamedEntries(
+        new NamedEntriesOptions { Kind = "workspace", Root = folder, OwnerKind = "task", OwnerIn = name => name.Length == 32 ? name : null },
+        TimeProvider.System);
+    var observed = await entries.ObserveAsync([], CancellationToken.None);
+    var isNamed = observed.Resources is [{ Owner.Id: var id }] && string.Equals(id, task, StringComparison.Ordinal);
+
+    Console.WriteLine($"plan: {order}; rule read back: {isRead}; entry named for its owner: {isNamed}");
+
+    return string.Equals(order, "process:7@1,file:/scratch", StringComparison.Ordinal) && isRead && isNamed ? 0 : 1;
 }
 finally
 {
