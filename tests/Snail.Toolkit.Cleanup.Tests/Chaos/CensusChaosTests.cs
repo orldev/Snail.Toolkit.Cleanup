@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Time.Testing;
 using Snail.Toolkit.Cleanup.Adapters;
 using Snail.Toolkit.Cleanup.Application;
@@ -96,21 +95,20 @@ public sealed class CensusChaosTests : IDisposable
     }
 
     /// <summary>
-    /// Breaks: the parallel look. The census asks every kind at once with Task.WhenAll, but a kind that looks
-    /// synchronously, as NamedEntries does, answers a finished task: four kinds of 100 ms each take 400 ms, not 100.
+    /// Breaks: the parallel look. The census asks every kind at once, but a kind that looks synchronously, as
+    /// NamedEntries does, answered a finished task and the kinds were looked at one after another: four looks of 100 ms
+    /// took 404 ms (2026-10-21). Two kinds that each wait for the other to be looked at meet only when they are looked
+    /// at at once; looked at in turn, the first waits alone and says so.
     /// </summary>
     [Fact]
-    public async Task Census_OverFourKindsThatLookSynchronously_LooksAtThemAtOnce()
+    public async Task Census_OverTwoKindsThatLookSynchronously_LooksAtThemAtOnce()
     {
-        IResourceKind[] kinds = [.. Enumerable.Range(0, 4).Select(index => new SlowKind($"slow-{index}", TimeSpan.FromMilliseconds(100)))];
-        var census = CensusOf([Alive(Me)], kinds);
-        var started = Stopwatch.GetTimestamp();
+        using var meeting = new Barrier(2);
+        IResourceKind[] kinds = [new MeetingKind("first", meeting), new MeetingKind("second", meeting)];
 
-        await census.TakeAsync(Me, CancellationToken.None);
+        var inventory = await CensusOf([Alive(Me)], kinds).TakeAsync(Me, CancellationToken.None);
 
-        var took = Stopwatch.GetElapsedTime(started);
-
-        Assert.True(took < TimeSpan.FromMilliseconds(300), $"four looks of 100 ms took {took.TotalMilliseconds:f0} ms");
+        Assert.Empty(inventory.Notes);
     }
 
     /// <summary>Breaks: a rules file named without a folder; the directory of «rules.json» is the empty string, which cannot be created.</summary>
@@ -133,16 +131,16 @@ public sealed class CensusChaosTests : IDisposable
 
     public void Dispose() => _scratch.Dispose();
 
-    /// <summary>A kind that looks the way a kind walking a disk does: on the thread that asked, for as long as it takes.</summary>
-    private sealed class SlowKind(string name, TimeSpan takes) : IResourceKind
+    /// <summary>A kind that looks the way a kind walking a disk does, on the thread that asked, and waits there for the other kind to be looked at too.</summary>
+    private sealed class MeetingKind(string name, Barrier meeting) : IResourceKind
     {
         public string Name => name;
 
         public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken)
         {
-            Thread.Sleep(takes);
+            var isMet = meeting.SignalAndWait(TimeSpan.FromSeconds(5));
 
-            return Task.FromResult(new Observation(Name, [], []));
+            return Task.FromResult(isMet ? new Observation(Name, [], []) : Observation.Unseen(Name, "looked at alone: the other kind was not being looked at"));
         }
 
         public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
