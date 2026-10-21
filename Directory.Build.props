@@ -6,8 +6,15 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <!--
+    The first release: 0.1.0 is the baseline every later pack is validated against, and until it is on nuget.org there is
+    nothing to download and compare with, so the comparison itself is off. Remove DisablePackageBaselineValidation once
+    0.1.0 is published, and move PublicAPI.Unshipped.txt into PublicAPI.Shipped.txt.
+  -->
   <PropertyGroup>
     <VersionPrefix>0.1.0</VersionPrefix>
+    <SnailPackageBaseline>0.1.0</SnailPackageBaseline>
+    <DisablePackageBaselineValidation>true</DisablePackageBaselineValidation>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/orldev/Snail.Toolkit.Cleanup</RepositoryUrl>
     <PackageProjectUrl>https://github.com/orldev/Snail.Toolkit.Cleanup</PackageProjectUrl>
