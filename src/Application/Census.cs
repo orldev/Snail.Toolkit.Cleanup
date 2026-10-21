@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace Snail.Toolkit.Cleanup.Application;
 
 /// <summary>Takes stock of the machine: asks every kind what it sees, settles whose each thing is, and notices what nothing knows.</summary>
@@ -10,6 +12,11 @@ namespace Snail.Toolkit.Cleanup.Application;
 /// Kinds only know what they were written for, so every census also follows the trails and compares them
 /// with what each owner still going began with. What is new, claimed by no kind and covered by no rule is a
 /// discovery: the account never assumes it already knows every kind of leftover there is.
+/// </para>
+/// <para>
+/// The kinds are asked at once, each on a thread of its own: a kind that looks synchronously, as one walking a disk does,
+/// would otherwise answer a finished task and the kinds would look one after another — four looks of 100 ms took 404 ms
+/// (2026-10-21).
 /// </para>
 /// </remarks>
 public sealed class Census(
@@ -34,7 +41,7 @@ public sealed class Census(
     {
         var began = clock.GetUtcNow();
         var started = clock.GetTimestamp();
-        var timings = new System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan>(StringComparer.Ordinal);
+        var timings = new ConcurrentDictionary<string, TimeSpan>(StringComparer.Ordinal);
         var known = await holders.ListAsync(cancellationToken);
         var observations = await Task.WhenAll(kinds.Select(kind => TimedAsync($"kind:{kind.Name}", timings, () => ObservedAsync(kind, known, cancellationToken))));
         var holdings = await TimedAsync("ledger:holdings", timings, async () => (await ledger.HoldingsAsync(cancellationToken)).ToDictionary(holding => holding.ResourceId, StringComparer.Ordinal));
@@ -46,16 +53,9 @@ public sealed class Census(
         {
             await RememberAncestryAsync(settled, holdings, now, cancellationToken);
             await ForgetTheGoneAsync(observations, settled, holdings.Values.Where(holding => holding.RecordedAt < began - Settling), cancellationToken);
-
-            return true;
         });
 
-        var (found, trailNotes) = await NoticeAsync(observations, settled, known, now, timings, cancellationToken);
-        var notes = observations
-            .Where(observation => observation.Note is not null)
-            .Select(observation => KeyValuePair.Create(observation.Kind, observation.Note!))
-            .Concat(trailNotes);
-
+        var noticed = await NoticeAsync(observations, settled, known, now, timings, cancellationToken);
         var kept = await TimedAsync("ledger:holdings", timings, () => ledger.KeptAsync(cancellationToken));
 
         timings["census"] = clock.GetElapsedTime(started);
@@ -64,8 +64,8 @@ public sealed class Census(
         {
             Asker = asker,
             Kept = kept,
-            Discoveries = found,
-            Notes = notes.ToDictionary(),
+            Discoveries = noticed.Found,
+            Notes = Noted(observations, noticed.Notes),
             Timings = timings.ToDictionary(StringComparer.Ordinal)
         };
 
@@ -73,7 +73,7 @@ public sealed class Census(
     }
 
     /// <summary>Runs one look and adds how long it took to the time written down under its name.</summary>
-    private async Task<T> TimedAsync<T>(string name, System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan> timings, Func<Task<T>> look)
+    private async Task<T> TimedAsync<T>(string name, ConcurrentDictionary<string, TimeSpan> timings, Func<Task<T>> look)
     {
         var started = clock.GetTimestamp();
 
@@ -89,17 +89,53 @@ public sealed class Census(
         }
     }
 
-    /// <summary>What a kind sees, or why it could not look: a kind that fails says so instead of failing the census.</summary>
+    /// <summary>Runs one piece of bookkeeping and adds how long it took to the time written down under its name.</summary>
+    private async Task TimedAsync(string name, ConcurrentDictionary<string, TimeSpan> timings, Func<Task> work)
+    {
+        var started = clock.GetTimestamp();
+
+        try
+        {
+            await work();
+        }
+        finally
+        {
+            var took = clock.GetElapsedTime(started);
+
+            timings.AddOrUpdate(name, took, (_, before) => before + took);
+        }
+    }
+
+    /// <summary>What a kind sees, on a thread of its own, or why it could not look: a kind that fails says so instead of failing the census.</summary>
     private static async Task<Observation> ObservedAsync(IResourceKind kind, IReadOnlyList<Holder> known, CancellationToken cancellationToken)
     {
         try
         {
-            return await kind.ObserveAsync(known, cancellationToken);
+            return await Task.Run(() => kind.ObserveAsync(known, cancellationToken), cancellationToken);
         }
         catch (Exception failure) when (failure is not OperationCanceledException)
         {
             return Observation.Unseen(kind.Name, $"could not look: {failure.Message}");
         }
+    }
+
+    /// <summary>The notes of what could not be seen, one line per name: two kinds of one name that both could not look share a line.</summary>
+    private static Dictionary<string, string> Noted(IReadOnlyList<Observation> observations, IReadOnlyList<KeyValuePair<string, string>> trailNotes)
+    {
+        var notes = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var observation in observations)
+        {
+            if (observation.Note is not { } note)
+                continue;
+
+            notes[observation.Kind] = notes.TryGetValue(observation.Kind, out var before) ? $"{before}; {note}" : note;
+        }
+
+        foreach (var (name, note) in trailNotes)
+            notes[name] = note;
+
+        return notes;
     }
 
     private static Resource Settled(Resource resource, Dictionary<string, Holding> holdings)
@@ -142,16 +178,29 @@ public sealed class Census(
 
     private static string KindOf(string resourceId) => resourceId[..Math.Max(resourceId.IndexOf(':', StringComparison.Ordinal), 0)];
 
-    /// <summary>Follows every trail, takes the baselines still missing, writes down what is new, and returns the whole record.</summary>
-    private async Task<(IReadOnlyList<Discovery> Found, IEnumerable<KeyValuePair<string, string>> Notes)> NoticeAsync(
+    /// <summary>
+    /// Follows every trail, takes the baselines still missing, writes down what is new, and returns the whole record;
+    /// when the rules cannot be read, nothing is noticed and the note says so, since without them every trace would be new.
+    /// </summary>
+    private async Task<Noticed> NoticeAsync(
         IReadOnlyList<Observation> observations,
         IReadOnlyList<Resource> settled,
         IReadOnlyList<Holder> known,
         DateTimeOffset now,
-        System.Collections.Concurrent.ConcurrentDictionary<string, TimeSpan> timings,
+        ConcurrentDictionary<string, TimeSpan> timings,
         CancellationToken cancellationToken)
     {
-        var shown = await rules.ListAsync(cancellationToken);
+        IReadOnlyList<Rule> shown;
+
+        try
+        {
+            shown = await rules.ListAsync(cancellationToken);
+        }
+        catch (Exception failure) when (failure is not OperationCanceledException)
+        {
+            return new Noticed([], [KeyValuePair.Create("rules", $"could not read the rules, so nothing was noticed: {failure.Message}")]);
+        }
+
         var walked = Walked(observations);
         var followed = await Task.WhenAll(trails.Select(trail => walked.TryGetValue(trail.Name, out var traces)
             ? Task.FromResult<(string Name, IReadOnlyList<Trace> Traces, string? Note)>((trail.Name, traces, null))
@@ -165,32 +214,17 @@ public sealed class Census(
         var present = new HashSet<string>(ids, StringComparer.Ordinal);
         var alive = known.Where(holder => holder.IsAlive).ToList();
 
-        await TimedAsync("ledger:baselines", timings, async () =>
-        {
-            await BeginAsync(alive, ids, now, cancellationToken);
-
-            return true;
-        });
+        await TimedAsync("ledger:baselines", timings, () => BeginAsync(alive, ids, now, cancellationToken));
 
         var written = await TimedAsync("ledger:discoveries", timings, () => discoveries.ListAsync(present, now, cancellationToken));
         var fresh = await TimedAsync("noticing", timings, () => NewAsync(traces, ids, Claimed(observations, settled), shown, alive, written, now, cancellationToken));
 
-        await TimedAsync("ledger:discoveries", timings, async () =>
-        {
-            await discoveries.NoteAsync(fresh, cancellationToken);
+        await TimedAsync("ledger:discoveries", timings, () => discoveries.NoteAsync(fresh, cancellationToken));
+        await TimedAsync("ledger:baselines", timings, () => baselines.KeepOnlyAsync(alive.Select(holder => holder.Owner).ToHashSet(), cancellationToken));
 
-            return true;
-        });
-        await TimedAsync("ledger:baselines", timings, async () =>
-        {
-            await baselines.KeepOnlyAsync(alive.Select(holder => holder.Owner).ToHashSet(), cancellationToken);
+        List<KeyValuePair<string, string>> notes = [.. followed.Where(trail => trail.Note is not null).Select(trail => KeyValuePair.Create($"trail:{trail.Name}", trail.Note!))];
 
-            return true;
-        });
-
-        var notes = followed.Where(trail => trail.Note is not null).Select(trail => KeyValuePair.Create($"trail:{trail.Name}", trail.Note!));
-
-        return (Merged(written, fresh), notes);
+        return new Noticed(Merged(written, fresh), notes);
     }
 
     /// <summary>
@@ -355,9 +389,10 @@ public sealed class Census(
         }
     }
 
+    /// <summary>The owner whose directory the trace is inside, or the only owner going; a holder with no directory, or an empty one, works nowhere.</summary>
     private static Owner OwnerOf(Trace trace, IReadOnlyList<Holder> during)
     {
-        var inside = during.FirstOrDefault(holder => holder.Directory is { } directory && IsInside(trace.Key, directory));
+        var inside = during.FirstOrDefault(holder => holder.Directory is { Length: > 0 } directory && IsInside(trace.Key, directory));
 
         if (inside is not null)
             return inside.Owner;
@@ -367,4 +402,7 @@ public sealed class Census(
 
     private static bool IsInside(string path, string directory) =>
         path.StartsWith($"{Path.TrimEndingDirectorySeparator(directory)}/", StringComparison.Ordinal);
+
+    /// <summary>What a census noticed: the discoveries as the record now holds them, and the trails or rules it could not read.</summary>
+    private sealed record Noticed(IReadOnlyList<Discovery> Found, IReadOnlyList<KeyValuePair<string, string>> Notes);
 }

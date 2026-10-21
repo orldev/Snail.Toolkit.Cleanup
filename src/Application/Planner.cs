@@ -52,20 +52,29 @@ public static class Planner
             ? new Decision(resource, Verdict.Remove, "a shared cache that rebuilds itself")
             : new Decision(resource, Verdict.Report, "shared, and it does not rebuild itself");
 
+    /// <summary>Removed with proof, reported without: whether evidence is proof is <see cref="EvidenceStrength.IsProof"/>'s to say, once.</summary>
     private static Decision Owned(Resource resource, Standing standing)
     {
         var whose = standing == Standing.Orphaned ? $"{resource.Owner}, which has ended" : $"{resource.Owner}";
 
-        return resource.Evidence switch
-        {
-            Evidence.Ledger => new Decision(resource, Verdict.Remove, $"recorded at birth for {whose}"),
-            Evidence.Label => new Decision(resource, Verdict.Remove, $"its name carries {whose}"),
-            Evidence.Environment => new Decision(resource, Verdict.Remove, $"its environment carries {whose}: it was started for it"),
-            Evidence.Ancestry => new Decision(resource, Verdict.Remove, $"seen running under the process of {whose}"),
-            Evidence.Appeared => new Decision(resource, Verdict.Report, $"appeared while {whose} was running, which is not proof that it made it"),
-            _ => new Decision(resource, Verdict.Report, "nothing ties it to an owner")
-        };
+        if (resource.Evidence == Evidence.Appeared)
+            return new Decision(resource, Verdict.Report, $"appeared while {whose} was running, which is not proof that it made it");
+
+        if (!resource.Evidence.IsProof())
+            return new Decision(resource, Verdict.Report, "nothing ties it to an owner");
+
+        return new Decision(resource, Verdict.Remove, Proven(resource.Evidence, whose));
     }
+
+    /// <summary>What the proof is, in the words of the evidence.</summary>
+    private static string Proven(Evidence evidence, string whose) => evidence switch
+    {
+        Evidence.Ledger => $"recorded at birth for {whose}",
+        Evidence.Label => $"its name carries {whose}",
+        Evidence.Environment => $"its environment carries {whose}: it was started for it",
+        Evidence.Ancestry => $"seen running under the process of {whose}",
+        _ => $"proven for {whose}"
+    };
 
     private static Standing StandingOf(Resource resource, Owner asker, IReadOnlySet<Owner> alive)
     {

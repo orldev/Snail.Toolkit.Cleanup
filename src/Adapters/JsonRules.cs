@@ -11,6 +11,8 @@ namespace Snail.Toolkit.Cleanup.Adapters;
 /// </remarks>
 public sealed partial class JsonRules(string path, IReadOnlyList<Rule> shipped) : IRules
 {
+    private readonly string _path = Path.GetFullPath(path);
+
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Rule>> ListAsync(CancellationToken cancellationToken) =>
         [.. shipped, .. await LearnedAsync(cancellationToken)];
@@ -20,22 +22,22 @@ public sealed partial class JsonRules(string path, IReadOnlyList<Rule> shipped) 
     {
         var learned = await LearnedAsync(cancellationToken);
         var written = new Learned([.. learned.Where(known => known.Trail != rule.Trail || known.Pattern != rule.Pattern), rule]);
-        var temporary = $"{path}.{Guid.NewGuid():n}";
+        var temporary = $"{_path}.{Guid.NewGuid():n}";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
 
         await File.WriteAllTextAsync(temporary, JsonSerializer.Serialize(written, RulesJson.Default.Learned), cancellationToken);
-        File.Move(temporary, path, overwrite: true);
+        File.Move(temporary, _path, overwrite: true);
     }
 
     private async Task<IReadOnlyList<Rule>> LearnedAsync(CancellationToken cancellationToken)
     {
-        if (!File.Exists(path))
+        if (!File.Exists(_path))
             return [];
 
         try
         {
-            return JsonSerializer.Deserialize(await File.ReadAllTextAsync(path, cancellationToken), RulesJson.Default.Learned)?.Rules ?? [];
+            return JsonSerializer.Deserialize(await File.ReadAllTextAsync(_path, cancellationToken), RulesJson.Default.Learned)?.Rules ?? [];
         }
         catch (JsonException)
         {

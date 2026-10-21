@@ -9,9 +9,15 @@ namespace Snail.Toolkit.Cleanup.Adapters;
 /// entry that may still be in use: one counted from when it was last written, one from when its owner ended, as the
 /// holder says — a task completed a minute ago may be continued by a person. Time comes from the host's clock.
 /// <para>
+/// «Written» means anywhere inside: a file written one level down changes nothing on the directory itself, so the newest
+/// write of everything walked is what the grace is counted from and what a release compares. A directory in the future,
+/// as a restored backup or a skewed clock leaves it, is blocked by that rather than by a grace it is not within.
+/// </para>
+/// <para>
 /// Release looks again before it deletes: an entry that is gone was already released, and one that became a link,
 /// changed between directory and file, or was written since it was observed is no longer the entry the plan described,
-/// and is left. Links are never followed out of the root: a link among the entries is reported and never removed, a
+/// and is left. The inside of a directory is compared only when both walks saw the whole of it; a walk cut short says
+/// nothing about what it did not see. A folder that another cleaner took while this one was looking is gone, not failed. Links are never followed out of the root: a link among the entries is reported and never removed, a
 /// link inside a directory is neither counted nor followed, and a directory is deleted without following the links in
 /// it. Sizes are the lengths of the files counted, as <see cref="Resource.Bytes"/> says, and «at least» when a count
 /// stopped short.
@@ -20,8 +26,8 @@ namespace Snail.Toolkit.Cleanup.Adapters;
 /// Only what can go is walked: a directory whose owner is still going is kept whatever its size, so its size is left
 /// unknown rather than counted file by file at every observation — a running task's build output is the largest thing
 /// under a worker's root and the one thing a pass never removes. A file's length comes with the listing and is always
-/// given. A directory that goes without having been measured, as the asking owner's own may, is measured as it is
-/// released, so the release still says what it gave back.
+/// given. A directory is walked once more as it is released, so the release compares the newest write and still says
+/// what it gave back.
 /// </para>
 /// </remarks>
 public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock) : IResourceKind
@@ -35,6 +41,8 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
     private const string EntryFact = "entry";
 
     private const string WrittenFact = "written";
+
+    private const string InsideFact = "written-inside";
 
     private const string LengthFact = "length";
 
@@ -96,15 +104,27 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
         if (entry is null)
             return Task.FromResult(Release.AlreadyGone(resource));
 
-        if (Changed(resource, entry) is { } change)
+        if (entry.LinkTarget is not null)
+            return Task.FromResult(Release.NotTheSame(resource, "it is a link now, and links are never followed out of the root"));
+
+        var measure = Measured(entry, cancellationToken);
+
+        if (Changed(resource, entry, measure) is { } change)
             return Task.FromResult(Release.NotTheSame(resource, change));
 
-        var released = resource.Bytes is null ? MeasuredAsItGoes(resource, entry, cancellationToken) : resource;
+        var released = resource.Bytes is null ? resource with { Bytes = measure.Bytes, IsAtLeast = measure.IsAtLeast } : resource;
 
-        if (entry is DirectoryInfo directory)
-            directory.Delete(recursive: true);
-        else
-            entry.Delete();
+        try
+        {
+            if (entry is DirectoryInfo directory)
+                directory.Delete(recursive: true);
+            else
+                entry.Delete();
+        }
+        catch (Exception failure) when (failure is DirectoryNotFoundException or FileNotFoundException)
+        {
+            return Task.FromResult(EntryAt(path) is null ? Release.AlreadyGone(resource) : Release.Refused(resource, failure.Message));
+        }
 
         var detail = options.ReleaseDetail?.Invoke(released) ?? $"deleted from {_root}";
 
@@ -123,7 +143,7 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
 
         var owner = new Owner(options.OwnerKind, id);
         var isMeasured = !isLink && (entry is FileInfo || !alive.Contains(owner));
-        var (bytes, isAtLeast) = isMeasured ? Measured(entry, cancellationToken) : (null, false);
+        var measure = isMeasured ? Measured(entry, cancellationToken) : Measure.Unwalked(entry);
 
         var resource = new Resource
         {
@@ -132,22 +152,27 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
             Title = $"{Name} {entry.Name} of {owner}",
             Owner = owner,
             Evidence = Evidence.Label,
-            Bytes = bytes,
-            IsAtLeast = isAtLeast,
+            Bytes = measure.Bytes,
+            IsAtLeast = measure.IsAtLeast,
             IsRegenerable = options.IsRegenerable,
-            Blocker = Blocker(entry, isLink, owner, ended, now),
-            Facts = Facts(entry)
+            Blocker = Blocker(isLink, owner, measure.WrittenAt, ended, now),
+            Facts = Facts(entry, measure)
         };
 
         return resource;
     }
 
-    private string? Blocker(FileSystemInfo entry, bool isLink, Owner owner, Dictionary<Owner, DateTimeOffset> ended, DateTimeOffset now)
+    private string? Blocker(bool isLink, Owner owner, DateTime writtenAt, Dictionary<Owner, DateTimeOffset> ended, DateTimeOffset now)
     {
         if (isLink)
             return "a link: what it points at is never followed out of the root";
 
-        if (now.UtcDateTime - entry.LastWriteTimeUtc < options.Grace)
+        var sinceWritten = now.UtcDateTime - writtenAt;
+
+        if (sinceWritten < TimeSpan.Zero)
+            return "written in the future: the clock of whatever wrote it is wrong, so when it was last used cannot be told";
+
+        if (sinceWritten < options.Grace)
             return "written within the grace: something may still be using it";
 
         if (ended.TryGetValue(owner, out var endedAt) && now - endedAt < options.Grace)
@@ -187,50 +212,56 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
         return ended;
     }
 
-    private static (long? Bytes, bool IsAtLeast) Measured(FileSystemInfo entry, CancellationToken cancellationToken)
+    /// <summary>The lengths of the files of an entry and the newest write anywhere inside it, a directory's own included.</summary>
+    private static Measure Measured(FileSystemInfo entry, CancellationToken cancellationToken)
     {
         if (entry is FileInfo file)
-            return (file.Length, false);
+            return new Measure(file.Length, false, file.LastWriteTimeUtc);
 
         long bytes = 0;
         var counted = 0;
+        var writtenAt = entry.LastWriteTimeUtc;
 
         try
         {
-            foreach (var inside in ((DirectoryInfo)entry).EnumerateFiles("*", Walking))
+            foreach (var inside in ((DirectoryInfo)entry).EnumerateFileSystemInfos("*", Walking))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (++counted > CountedAtMost)
-                    return (bytes, true);
+                if (inside.LastWriteTimeUtc > writtenAt)
+                    writtenAt = inside.LastWriteTimeUtc;
 
-                bytes += inside.Length;
+                if (inside is not FileInfo counting)
+                    continue;
+
+                if (++counted > CountedAtMost)
+                    return new Measure(bytes, true, writtenAt);
+
+                bytes += counting.Length;
             }
         }
         catch (Exception failure) when (failure is IOException or UnauthorizedAccessException)
         {
-            return (bytes, true);
+            return new Measure(bytes, true, writtenAt);
         }
 
-        return (bytes, false);
+        return new Measure(bytes, false, writtenAt);
     }
 
-    /// <summary>The resource with the size of an entry that was not measured when it was observed, measured now that it goes.</summary>
-    private static Resource MeasuredAsItGoes(Resource resource, FileSystemInfo entry, CancellationToken cancellationToken)
-    {
-        var (bytes, isAtLeast) = Measured(entry, cancellationToken);
-
-        return resource with { Bytes = bytes, IsAtLeast = isAtLeast };
-    }
-
-    /// <summary>What the entry was when it was observed, so that a release can tell it is still the same one.</summary>
-    private static Dictionary<string, string> Facts(FileSystemInfo entry)
+    /// <summary>
+    /// What the entry was when it was observed, so that a release can tell it is still the same one: its own write time
+    /// always, and the newest write inside a directory when the whole of it was walked.
+    /// </summary>
+    private static Dictionary<string, string> Facts(FileSystemInfo entry, Measure measure)
     {
         var facts = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             [EntryFact] = TypeOf(entry),
-            [WrittenFact] = entry.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture)
+            [WrittenFact] = Ticks(entry.LastWriteTimeUtc)
         };
+
+        if (entry is DirectoryInfo && measure.IsWhole)
+            facts[InsideFact] = Ticks(measure.WrittenAt);
 
         if (entry is FileInfo { LinkTarget: null } file)
             facts[LengthFact] = file.Length.ToString(CultureInfo.InvariantCulture);
@@ -238,22 +269,25 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
         return facts;
     }
 
-    private static string? Changed(Resource resource, FileSystemInfo entry)
+    /// <summary>Why the entry is no longer the one observed; the inside of a directory is compared only when both walks saw the whole of it.</summary>
+    private static string? Changed(Resource resource, FileSystemInfo entry, Measure measure)
     {
-        if (entry.LinkTarget is not null)
-            return "it is a link now, and links are never followed out of the root";
-
         if (!string.Equals(resource.Facts.GetValueOrDefault(EntryFact), TypeOf(entry), StringComparison.Ordinal))
             return $"it is a {TypeOf(entry)} now";
 
-        if (!string.Equals(resource.Facts.GetValueOrDefault(WrittenFact), entry.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
+        if (!string.Equals(resource.Facts.GetValueOrDefault(WrittenFact), Ticks(entry.LastWriteTimeUtc), StringComparison.Ordinal))
             return "written since it was observed";
+
+        if (resource.Facts.TryGetValue(InsideFact, out var inside) && measure.IsWhole && !string.Equals(inside, Ticks(measure.WrittenAt), StringComparison.Ordinal))
+            return "written inside since it was observed";
 
         if (entry is FileInfo file && !string.Equals(resource.Facts.GetValueOrDefault(LengthFact), file.Length.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
             return "its length changed since it was observed";
 
         return null;
     }
+
+    private static string Ticks(DateTime at) => at.Ticks.ToString(CultureInfo.InvariantCulture);
 
     private static string TypeOf(FileSystemInfo entry) => entry is DirectoryInfo ? "directory" : "file";
 
@@ -273,4 +307,14 @@ public sealed class NamedEntries(NamedEntriesOptions options, TimeProvider clock
 
     private bool IsDirectlyUnderRoot(string path) =>
         string.Equals(Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(path)), _root, StringComparison.Ordinal);
+
+    /// <summary>What a walk of an entry found: its size, whether the count stopped short, and the newest write inside.</summary>
+    private readonly record struct Measure(long? Bytes, bool IsAtLeast, DateTime WrittenAt)
+    {
+        /// <summary>Whether the walk saw everything, so that the newest write is the newest of the whole entry.</summary>
+        public bool IsWhole => Bytes is not null && !IsAtLeast;
+
+        /// <summary>An entry that was not walked: no size, and its own write time for the newest.</summary>
+        public static Measure Unwalked(FileSystemInfo entry) => new(null, false, entry.LastWriteTimeUtc);
+    }
 }

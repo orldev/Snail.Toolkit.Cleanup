@@ -280,6 +280,7 @@ public sealed class NamedEntriesTests : IDisposable
         {
             locked = Directory.CreateDirectory(Path.Combine(root, "locked")).FullName;
             File.WriteAllText(Path.Combine(locked, "secret.txt"), "unreadable");
+            Aged(locked, Now - TimeSpan.FromHours(5));
             File.SetUnixFileMode(locked, UnixFileMode.None);
         });
 
@@ -434,10 +435,20 @@ public sealed class NamedEntriesTests : IDisposable
 
         Directory.CreateDirectory(Path.Combine(folder, "step-0"));
         File.WriteAllText(Path.Combine(folder, "step-0", "out.txt"), "0123456789");
+        Aged(folder, Now - age);
         inside?.Invoke(folder);
         Directory.SetLastWriteTimeUtc(folder, (Now - age).UtcDateTime);
 
         return folder;
+    }
+
+    /// <summary>The folder and everything in it written at one moment, as a task that stopped then leaves them.</summary>
+    private static void Aged(string folder, DateTimeOffset at)
+    {
+        foreach (var entry in Directory.EnumerateFileSystemEntries(folder, "*", SearchOption.AllDirectories))
+            File.SetLastWriteTimeUtc(entry, at.UtcDateTime);
+
+        Directory.SetLastWriteTimeUtc(folder, at.UtcDateTime);
     }
 
     private string Key(string name, TimeSpan age)

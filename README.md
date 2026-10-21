@@ -25,7 +25,13 @@ also carries the asking owner, what was kept on request, the discoveries and wha
 A plan may be carried out minutes after it was decided. A host whose owners can come back — a session of an agent is
 resumed under the same id — gives the cleaner its holders, `new Cleaner(kinds, ledger, holders)`: they are asked once
 more before anything goes, and what belongs to an owner going again is left alone, its release `Changed`. A host whose
-owners never come back once over, such as finished tasks, may leave them out.
+owners never come back once over, such as finished tasks, may leave them out. A cleaner given the host's clock as well,
+`new Cleaner(kinds, ledger, holders, clock)`, refuses a plan older than `Plan.Lifetime` (ten minutes) rather than carry
+out a plan about a machine that no longer exists; without a clock it takes the plan's word.
+
+What went is always told. A ledger that could not be told, a cleanup the host stopped, a kind that failed halfway: each
+is written into the release it happened to, and the releases before it are answered as they were, so `ApplyAsync`
+never throws away the record of what is already gone.
 
 A host that stores baselines whole keeps `Baseline.ToBytes()`, eight bytes an id, and reads it back with
 `Baseline.FromBytes`.
@@ -53,8 +59,9 @@ var order = KindOrder.General
 
 `NamedEntries` is a ready-made kind for entries under a root whose name carries their owner — the folder of a task
 named for the task, the key of a project named for the project. The name is the proof; an entry goes once its owner
-is over or erased, but not within a grace after it was last written or after its owner ended, and never when it
-changed since it was observed. Links are never followed out of the root. A platform worker covers its folders and its
+is over or erased, but not within a grace after it was last written — anywhere inside it, since a file written one
+level down changes nothing on the folder itself — or after its owner ended, and never when it changed since it was
+observed. Links are never followed out of the root. A platform worker covers its folders and its
 keys with two instances:
 
 ```csharp

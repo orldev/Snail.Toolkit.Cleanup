@@ -70,8 +70,9 @@ Carries out the removals of a plan that was shown, one resource at a time, in th
 
 | Member | Summary |
 | --- | --- |
-| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger)` | A cleaner that takes the plan's word for which owners are over. |
-| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger, IHolders? holders)` | Carries out the removals of a plan that was shown, one resource at a time, in the plan's order. |
+| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger)` | A cleaner that takes the plan's word for which owners are over and for how fresh it is. |
+| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger, IHolders? holders)` | A cleaner that asks the holders again and takes the plan's word for how fresh it is. |
+| `Cleaner(IEnumerable<IResourceKind> kinds, ILedger ledger, IHolders? holders, TimeProvider? clock)` | Carries out the removals of a plan that was shown, one resource at a time, in the plan's order. |
 | `Task<IReadOnlyList<Release>> ApplyAsync(Plan plan, CancellationToken cancellationToken)` | The removals of the plan, carried out, each with how it ended. |
 
 ### class NoLedger
