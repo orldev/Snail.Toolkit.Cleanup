@@ -111,6 +111,78 @@ public sealed class CensusChaosTests : IDisposable
         Assert.Empty(inventory.Notes);
     }
 
+    /// <summary>
+    /// Breaks: the thread pool. A kind that walks a disk synchronously was looked at through Task.Run and held a pool
+    /// thread for the whole walk; with 27 kinds looking side by side every worker was held, and a call that came in
+    /// meanwhile waited 7 to 8 seconds for a thread (Snail.MCP.CleanUp, 2026-11-01) until the host raised the pool's
+    /// minimum to 64. A kind looks on a thread of its own, so the pool stays free for the host.
+    /// </summary>
+    [Fact]
+    public async Task Census_OverAKindThatLooksSynchronously_LeavesThePoolAlone()
+    {
+        var kind = new PoolWatchingKind("walker");
+
+        await CensusOf([Alive(Me)], kind).TakeAsync(Me, CancellationToken.None);
+
+        Assert.False(kind.WasOnThePool);
+    }
+
+    /// <summary>
+    /// Breaks: the thread pool, after an await. The host's slowest kinds read the process table or the rules first and
+    /// walk the disk after that await; a thread that only started the look handed the walk to the pool where the await
+    /// resumed. The await comes back to the look's own thread.
+    /// </summary>
+    [Fact]
+    public async Task Census_OverAKindThatWalksAfterAnAwait_LeavesThePoolAlone()
+    {
+        var kind = new PoolWatchingKind("walker") { AwaitsFirst = true };
+
+        await CensusOf([Alive(Me)], kind).TakeAsync(Me, CancellationToken.None);
+
+        Assert.False(kind.WasOnThePool);
+    }
+
+    /// <summary>
+    /// Breaks: work a look leaves behind. A kind that starts a task and answers before it ends leaves that task's awaits
+    /// bound to a thread that has stopped running them; the task must end all the same, on the pool.
+    /// </summary>
+    [Fact]
+    public async Task Census_OverAKindThatLeavesWorkBehind_LetsTheWorkEnd()
+    {
+        var kind = new LeavingKind("leaver");
+
+        await CensusOf([Alive(Me)], kind).TakeAsync(Me, CancellationToken.None);
+
+        var ended = await Task.WhenAny(kind.Left, Task.Delay(TimeSpan.FromSeconds(10)));
+
+        Assert.Same(kind.Left, ended);
+    }
+
+    /// <summary>
+    /// Breaks: the thread pool, through the trails. A trail that walks a disk synchronously was followed on the thread
+    /// the census had come back on, a pool thread, and so was the measuring of what it found.
+    /// </summary>
+    [Fact]
+    public async Task Census_OverATrailThatWalksSynchronously_LeavesThePoolAlone()
+    {
+        var trail = new PoolWatchingTrail("file");
+        var census = new Census(
+            [new FakeKind(Kinds.File)],
+            [trail],
+            new FakeHolders(Me, Alive(Me)),
+            _ledger,
+            new JsonRules(_scratch.File("rules.json"), []),
+            _baselines,
+            _discoveries,
+            _clock);
+
+        await census.TakeAsync(Me, CancellationToken.None);
+        trail.Shows = true;
+        await census.TakeAsync(Me, CancellationToken.None);
+
+        Assert.Equal((false, false), (trail.FollowedOnThePool, trail.MeasuredOnThePool));
+    }
+
     /// <summary>Breaks: a rules file named without a folder; the directory of «rules.json» is the empty string, which cannot be created.</summary>
     [Fact]
     public async Task JsonRules_AtAPathWithoutAFolder_IsWrittenBesideTheProgram()
@@ -144,5 +216,81 @@ public sealed class CensusChaosTests : IDisposable
         }
 
         public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
+    }
+
+    /// <summary>A kind that walks synchronously, as one walking a disk does, and remembers whether it walked on a thread of the pool.</summary>
+    private sealed class PoolWatchingKind(string name) : IResourceKind
+    {
+        public string Name => name;
+
+        /// <summary>Whether it awaits something that does not complete at once before it walks, as reading the process table does.</summary>
+        public bool AwaitsFirst { get; init; }
+
+        public bool? WasOnThePool { get; private set; }
+
+        public async Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken)
+        {
+            if (AwaitsFirst)
+                await Task.Delay(TimeSpan.FromMilliseconds(20), cancellationToken);
+
+            WasOnThePool = Thread.CurrentThread.IsThreadPoolThread;
+
+            return new Observation(Name, [], []);
+        }
+
+        public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
+    }
+
+    /// <summary>A kind that starts work it does not wait for, as one warming a cache for the next look might.</summary>
+    private sealed class LeavingKind(string name) : IResourceKind
+    {
+        public string Name => name;
+
+        /// <summary>The work it left behind.</summary>
+        public Task Left { get; private set; } = Task.CompletedTask;
+
+        public Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken)
+        {
+            Left = LaterAsync();
+
+            return Task.FromResult(new Observation(Name, [], []));
+        }
+
+        public Task<Release> ReleaseAsync(Resource resource, CancellationToken cancellationToken) => Task.FromResult(Release.AlreadyGone(resource));
+
+        private static async Task LaterAsync()
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
+        }
+    }
+
+    /// <summary>A trail that is followed and measured synchronously and remembers whether either happened on a thread of the pool.</summary>
+    private sealed class PoolWatchingTrail(string name) : ITrail
+    {
+        public string Name => name;
+
+        /// <summary>Whether it shows a trace; one shown after the owner began is new, and so is measured.</summary>
+        public bool Shows { get; set; }
+
+        public bool? FollowedOnThePool { get; private set; }
+
+        public bool? MeasuredOnThePool { get; private set; }
+
+        public Task<IReadOnlyList<Trace>> FollowAsync(IReadOnlyList<Rule> rules, CancellationToken cancellationToken)
+        {
+            FollowedOnThePool = Thread.CurrentThread.IsThreadPoolThread;
+
+            IReadOnlyList<Trace> traces = Shows ? [new Trace(Name, "/scratch/new", "/scratch/new")] : [];
+
+            return Task.FromResult(traces);
+        }
+
+        public Task<Trace> MeasureAsync(Trace trace, CancellationToken cancellationToken)
+        {
+            MeasuredOnThePool = Thread.CurrentThread.IsThreadPoolThread;
+
+            return Task.FromResult(trace with { Bytes = 1 });
+        }
     }
 }

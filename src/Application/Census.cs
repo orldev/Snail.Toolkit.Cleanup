@@ -18,6 +18,13 @@ namespace Snail.Toolkit.Cleanup.Application;
 /// would otherwise answer a finished task and the kinds would look one after another — four looks of 100 ms took 404 ms
 /// (2026-10-21).
 /// </para>
+/// <para>
+/// A thread of its own is not one of the thread pool's. A look through <see cref="Task.Run(Func{Task})"/> held a pool
+/// thread for the whole walk, and 27 kinds looking side by side held every worker the pool had: a call the host was
+/// asked meanwhile waited 7 to 8 seconds for a thread (2026-11-01). Kinds, trails and the measuring of what a trail
+/// found run on threads made for them, which their awaits come back to (<see cref="LookThread"/>), and the pool stays
+/// the host's. The census itself goes on from the pool once a look has answered.
+/// </para>
 /// </remarks>
 public sealed class Census(
     IEnumerable<IResourceKind> kinds,
@@ -47,7 +54,7 @@ public sealed class Census(
         var holdings = await TimedAsync("ledger:holdings", timings, async () => (await ledger.HoldingsAsync(cancellationToken)).ToDictionary(holding => holding.ResourceId, StringComparer.Ordinal));
         var now = clock.GetUtcNow();
 
-        List<Resource> settled = [.. observations.SelectMany(observation => observation.Resources).Select(resource => Settled(resource, holdings))];
+        var settled = SettledAll(observations, holdings);
 
         await TimedAsync("ledger:holdings", timings, async () =>
         {
@@ -106,12 +113,12 @@ public sealed class Census(
         }
     }
 
-    /// <summary>What a kind sees, on a thread of its own, or why it could not look: a kind that fails says so instead of failing the census.</summary>
+    /// <summary>What a kind sees, on a thread of its own outside the pool, or why it could not look: a kind that fails says so instead of failing the census.</summary>
     private static async Task<Observation> ObservedAsync(IResourceKind kind, IReadOnlyList<Holder> known, CancellationToken cancellationToken)
     {
         try
         {
-            return await Task.Run(() => kind.ObserveAsync(known, cancellationToken), cancellationToken);
+            return await LookThread.RunAsync(() => kind.ObserveAsync(known, cancellationToken), cancellationToken);
         }
         catch (Exception failure) when (failure is not OperationCanceledException)
         {
@@ -136,6 +143,48 @@ public sealed class Census(
             notes[name] = note;
 
         return notes;
+    }
+
+    /// <summary>Every resource the kinds saw, settled against the ledger, in a list sized once.</summary>
+    /// <remarks>
+    /// Sized from the counts rather than grown through LINQ, which builds a list of unknown length in arrays rented from
+    /// the shared pool. A rented array goes back to the pool's store for the thread that returns it, and since the looks
+    /// run on threads of their own the census goes on from whichever thread of the pool their answers reach: at the next
+    /// census the rent missed and the arrays were made again, 0.9 MB more of every census over a busy machine's trail
+    /// (2026-11-12).
+    /// </remarks>
+    private static List<Resource> SettledAll(IReadOnlyList<Observation> observations, Dictionary<string, Holding> holdings)
+    {
+        var count = 0;
+
+        foreach (var observation in observations)
+            count += observation.Resources.Count;
+
+        var settled = new List<Resource>(count);
+
+        foreach (var observation in observations)
+        {
+            foreach (var resource in observation.Resources)
+                settled.Add(Settled(resource, holdings));
+        }
+
+        return settled;
+    }
+
+    /// <summary>Every trace of every trail, in a list sized once, for the reason <see cref="SettledAll"/> gives.</summary>
+    private static List<Trace> TracesOf(IReadOnlyList<(string Name, IReadOnlyList<Trace> Traces, string? Note)> followed)
+    {
+        var count = 0;
+
+        foreach (var trail in followed)
+            count += trail.Traces.Count;
+
+        var traces = new List<Trace>(count);
+
+        foreach (var trail in followed)
+            traces.AddRange(trail.Traces);
+
+        return traces;
     }
 
     private static Resource Settled(Resource resource, Dictionary<string, Holding> holdings)
@@ -205,7 +254,7 @@ public sealed class Census(
         var followed = await Task.WhenAll(trails.Select(trail => walked.TryGetValue(trail.Name, out var traces)
             ? Task.FromResult<(string Name, IReadOnlyList<Trace> Traces, string? Note)>((trail.Name, traces, null))
             : TimedAsync($"trail:{trail.Name}", timings, () => FollowedAsync(trail, shown, cancellationToken))));
-        var traces = followed.SelectMany(trail => trail.Traces).ToList();
+        var traces = TracesOf(followed);
         var ids = new string[traces.Count];
 
         for (var index = 0; index < traces.Count; index++)
@@ -286,7 +335,7 @@ public sealed class Census(
     {
         try
         {
-            return (trail.Name, await trail.FollowAsync(shown, cancellationToken), null);
+            return (trail.Name, await LookThread.RunAsync(() => trail.FollowAsync(shown, cancellationToken), cancellationToken), null);
         }
         catch (Exception failure) when (failure is not OperationCanceledException)
         {
@@ -381,7 +430,7 @@ public sealed class Census(
 
         try
         {
-            return trail is null ? trace : await trail.MeasureAsync(trace, cancellationToken);
+            return trail is null ? trace : await LookThread.RunAsync(() => trail.MeasureAsync(trace, cancellationToken), cancellationToken);
         }
         catch (Exception failure) when (failure is IOException or UnauthorizedAccessException)
         {

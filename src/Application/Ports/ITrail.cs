@@ -5,6 +5,10 @@ namespace Snail.Toolkit.Cleanup.Application.Ports;
 /// A trail is how the account notices what no kind was written for. It is followed when an owner begins
 /// and at every census after; whatever is new, claimed by no kind and covered by no rule becomes a
 /// discovery — written down, never removed.
+/// <para>
+/// A trail may be followed and measured synchronously, as one walking a disk is: the census runs each on a thread of
+/// its own, outside the thread pool, which its awaits come back to, and the trails are followed at once.
+/// </para>
 /// </remarks>
 public interface ITrail
 {

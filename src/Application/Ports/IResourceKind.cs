@@ -10,8 +10,10 @@ public interface IResourceKind
     /// <remarks>
     /// Looking must change nothing. A kind whose program would start a daemon only to be asked a question
     /// does not ask it, and says in its note that it could not see. A kind may look synchronously and answer a
-    /// finished task, as one walking a disk does: the census runs every kind on a thread of its own, so they are
-    /// looked at at once either way.
+    /// finished task, as one walking a disk does: the census runs every kind on a thread of its own, outside the thread
+    /// pool, so they are looked at at once either way and the host's pool stays free. That thread is the look's
+    /// synchronization context, so a walk after an await stays on it too; an await with
+    /// <c>ConfigureAwait(false)</c> leaves it, and a walk after one holds a thread of the pool again.
     /// </remarks>
     Task<Observation> ObserveAsync(IReadOnlyList<Holder> holders, CancellationToken cancellationToken);
 
