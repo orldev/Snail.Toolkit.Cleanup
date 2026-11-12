@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>0.1.1</VersionPrefix>
+    <VersionPrefix>0.1.2</VersionPrefix>
     <!-- The last release on NuGet: a pack fails on any change that would break a user of it. Raised with each release. -->
-    <SnailPackageBaseline>0.1.0</SnailPackageBaseline>
+    <SnailPackageBaseline>0.1.1</SnailPackageBaseline>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/orldev/Snail.Toolkit.Cleanup</RepositoryUrl>
     <PackageProjectUrl>https://github.com/orldev/Snail.Toolkit.Cleanup</PackageProjectUrl>
