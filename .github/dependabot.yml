@@ -3,6 +3,8 @@
 # the actions in one pull request, the packages' minor and patch updates in another, each major update in its own.
 # Security updates do not wait for the schedule. The shared workflows are called by their major tag (@v1): Dependabot
 # proposes the next major when Snail.Sdk releases one.
+# Snail.Sdk and its levels come in one pull request of their own, a major update too: global.json names them apart,
+# but they are released together and build only at one version.
 
 version: 2
 updates:
